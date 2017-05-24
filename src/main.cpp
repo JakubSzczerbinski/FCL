@@ -1,40 +1,32 @@
 #include <vector> 
 #include <memory>
-#include <boost/type_index.hpp>
 #include <iostream>
+#include <string>
 #include <cassert>
+
+#include <boost/type_index.hpp>
+
+#include <IFunction.hpp>
+#include <Constants.hpp>
+#include <Node.hpp>
 
 namespace bti = boost::typeindex;
 
-using TypeVector = std::vector<bti::type_index>;
-
-using nonType = char;
-
-
-class IFunction
-{
-public:
-	virtual std::vector<std::unique_ptr<nonType>> call(std::vector<nonType*>) = 0;
-	virtual TypeVector inputArgs() = 0;
-	virtual TypeVector outputArgs() = 0;
-	virtual std::string name() = 0;
-};
-
-class String : public IFunction
+class String : public fcl::IFunction
 {
 public:
 	String (std::string&& input) : str_(input) {}
-	std::vector<std::unique_ptr<nonType>> call(std::vector<nonType*>) override
+	std::vector<std::unique_ptr<fcl::nonType>> call(std::vector<fcl::nonType*>) override
 	{
-		std::vector<std::unique_ptr<nonType>> result;
-		result.emplace_back(reinterpret_cast<char*>(new std::string(str_)));
+		std::vector<std::unique_ptr<fcl::nonType>> result;
+		result.emplace_back(reinterpret_cast<fcl::nonType*>(new std::string(str_)));
 		return result;
 	}
-	TypeVector inputArgs() override
+	fcl::TypeVector inputArgs() override
 	{
 		return {};
 	}
-	TypeVector outputArgs() override
+	fcl::TypeVector outputArgs() override
 	{
 		return {bti::type_id<std::string>()};
 	}
@@ -42,64 +34,42 @@ public:
 	{
 		return "String";
 	}
+private:
 	std::string str_;
 };
 
-class Node;
-
-class NodeLink
+class Lowercase : public fcl::IFunction
 {
 public:
-	NodeLink (Node& node, unsigned idx, bti::type_index t) : node_(node), idx_(idx), type_(t) {}
-	unsigned idx_;
-	Node& node_;
-	bti::type_index type_;
-	nonType* get();
-	bti::type_index type();
-};
+	std::vector<std::unique_ptr<fcl::nonType>> call(std::vector<fcl::nonType*> args) override
+	{
+		std::vector<std::unique_ptr<fcl::nonType>> result;
+		std::string& str = *reinterpret_cast<std::string*>(args[0]);
+		auto outStr = new std::string();
 
-class Node
-{
-public:
-	std::vector<std::shared_ptr<NodeLink>> inNodeLinks;
-	std::vector<std::shared_ptr<NodeLink>> outNodeLinks;
-	std::vector<std::unique_ptr<nonType>> outputData;
-	std::unique_ptr<IFunction> function_;
-	Node(std::unique_ptr<IFunction> f, std::vector<std::shared_ptr<NodeLink>> nodeLinks) : inNodeLinks(nodeLinks), function_(move(f)) 
-	{
-		auto types = f->outputArgs();
-		for (size_t i = 0; i < types.size(); i++)
+		for (auto& ch : str)
 		{
-			outNodeLinks.emplace_back(std::make_shared<NodeLink>(*this, i, types[i]));
+			outStr->push_back(std::tolower(ch));
 		}
+
+		result.emplace_back(reinterpret_cast<fcl::nonType*>(outStr));
+		return result;
 	}
-	std::shared_ptr<NodeLink> getLink(unsigned int idx)
+	fcl::TypeVector inputArgs() override
 	{
-		return outNodeLinks[idx];
+		return {};
 	}
-	nonType* getValue(unsigned int i)
+	fcl::TypeVector outputArgs() override
 	{
-		update();
-		return outputData[i].get();
+		return {bti::type_id<std::string>()};
 	}
-	void update()
+	std::string name() override
 	{
-		std::vector<nonType*> inArgs;
-		for (auto& link : inNodeLinks)
-		{
-			inArgs.push_back(link->get());
-		}
-		outputData = function_->call(inArgs);
+		return "String";
 	}
 };
 
-nonType* NodeLink::get()
-{
-	node_.update();
-	return node_.getValue(idx_);
-}
-
-void simpleTest()
+void testStringFunction()
 {
 	String str("xd");
 	auto ret = str.call({});
@@ -107,8 +77,34 @@ void simpleTest()
 	assert(outputString == "xd");
 }
 
+void testStringFunctionNode()
+{
+	fcl::Node node(std::make_unique<String>("XD"), {});
+	std::string& outputString = *reinterpret_cast<std::string*>(node.getValue(0));
+	assert(outputString == "XD");
+}
+
+void testStringFunctionNodeWithNodeLink()
+{
+	fcl::Node node(std::make_unique<String>("XD"), {});
+	auto link = node.getLink(0);
+	std::string& outputString = *reinterpret_cast<std::string*>(link->get());
+	assert(outputString == "XD");
+}
+
+void testOneArgFunctionComposition()
+{
+	fcl::Node xdString(std::make_unique<String>("XD"), {});
+	fcl::Node toLowercase(std::make_unique<Lowercase>(), {xdString.getLink(0)});
+	auto link = toLowercase.getLink(0);
+	std::string& outputString = *reinterpret_cast<std::string*>(link->get());
+	assert(outputString == "xd");
+}
+
 int main()
 {
-	simpleTest();
+	testStringFunction();
+	testStringFunctionNode();
+	testStringFunctionNodeWithNodeLink();
 	return 0;
 }
