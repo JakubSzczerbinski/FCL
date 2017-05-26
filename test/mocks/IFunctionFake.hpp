@@ -1,0 +1,11 @@
+#pragma once
+
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
+#include <IFunction.hpp>
+
+namespace fcl
+{
+
+} // namespace fcl 

@@ -15,8 +15,8 @@ public:
 	std::vector<std::shared_ptr<NodeLink>> inNodeLinks;
 	std::vector<std::shared_ptr<NodeLink>> outNodeLinks;
 	std::vector<std::unique_ptr<nonType>> outputData;
-	std::unique_ptr<IFunction> function_;
-	Node(std::unique_ptr<IFunction> f, std::vector<std::shared_ptr<NodeLink>> nodeLinks) : inNodeLinks(nodeLinks), function_(move(f)) 
+	IFunction* function_;
+	Node(IFunction* f, std::vector<std::shared_ptr<NodeLink>> nodeLinks) : inNodeLinks(nodeLinks), function_(f) 
 	{
 		auto types = function_->outputArgs();
 		for (size_t i = 0; i < types.size(); i++)
