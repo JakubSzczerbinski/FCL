@@ -1,3 +1,6 @@
+
+#pragma once
+
 #include <set>
 #include <map>
 #include <string>
@@ -6,6 +9,9 @@
 #include <iostream>
 
 #include <boost/optional.hpp>
+
+namespace fcl
+{
 
 enum Tokens
 {
@@ -37,6 +43,11 @@ public:
 	std::string contents_;
 	Tokens type_;
 };
+
+bool operator == (const Token& lhs, const Token& rhs)
+{
+	return lhs.type_ == rhs.type_ && lhs.contents_ == rhs.contents_;
+}
 
 std::ostream& operator << (std::ostream& os, Token token)
 {
@@ -72,6 +83,7 @@ public:
 		}
 		return result;
 	}
+	virtual ~Lexer() = default;
 protected:
 	boost::optional<T> tokenize_(std::string::iterator& it, std::string::iterator end)
 	{
@@ -246,3 +258,5 @@ public:
 
 	
 };
+
+} // namespace fcl
