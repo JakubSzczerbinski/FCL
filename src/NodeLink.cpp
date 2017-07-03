@@ -7,7 +7,6 @@ namespace fcl
 
 nonType* NodeLink::get()
 {
-	node_.update();
 	return node_.getValue(idx_);
 }
 
