@@ -19,5 +19,8 @@ compiler:
   - clang++3.5
 
 
-install: cmake . && make fcl_tests
-script: make ut-run
+install:
+  - cmake .
+  - make fcl_tests
+script: 
+  - make ut-run
