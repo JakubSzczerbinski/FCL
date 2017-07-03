@@ -1,8 +1,17 @@
 language: cpp
+
+cache:
+  apt: true
+
 addons:
   apt:
+    sources:
+    - boost-latest
+    - ubuntu-toolchain-r-test
     packages:
-    - cmake
+    - gcc-4.9
+    - g++-4.9
     - libboost1.55-all-dev
+
 install: cmake . && make fcl_tests
 script: make ut-run
