@@ -1,6 +1,8 @@
 language: cpp
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y boost
+addons:
+  apt:
+    packages:
+    - cmake
+    - boost1.55
 install: cmake . && make fcl_tests
 script: make ut-run
