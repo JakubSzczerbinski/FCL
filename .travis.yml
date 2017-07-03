@@ -3,6 +3,6 @@ addons:
   apt:
     packages:
     - cmake
-    - boost1.55
+    - libboost1.55-all-dev
 install: cmake . && make fcl_tests
 script: make ut-run
