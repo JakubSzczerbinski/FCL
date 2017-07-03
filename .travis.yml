@@ -15,8 +15,8 @@ addons:
     - libboost1.55-all-dev
 
 compiler:
-  - g++4.9
-  - clang++3.5
+  - g++
+  - clang++
 
 
 install:
