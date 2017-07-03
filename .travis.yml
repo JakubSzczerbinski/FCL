@@ -11,7 +11,13 @@ addons:
     packages:
     - gcc-4.9
     - g++-4.9
+    - clang-3.9
     - libboost1.55-all-dev
+
+compiler:
+  - g++
+  - clnag++
+
 
 install: cmake . && make fcl_tests
 script: make ut-run
