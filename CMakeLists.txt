@@ -4,8 +4,13 @@ project (FCL)
 
 cmake_policy(SET CMP0015 NEW)
 
-include_directories(src)
-include_directories(include)
+find_package (Boost 1.55 REQUIRED)
+
+include_directories(
+	src
+	include
+	${BOOST_INCLUDE_DIRS}
+)
 
 link_directories(lib)
 
