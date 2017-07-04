@@ -3,6 +3,9 @@ language: cpp
 cache:
   apt: true
 
+os: linux
+dist: xenial
+
 addons:
   apt:
     sources:
