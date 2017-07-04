@@ -12,17 +12,21 @@ addons:
     - gcc-4.9
     - g++-4.9
     - clang-3.5
+    - clang-3.5
     - libboost1.55-all-dev
 
 compiler:
   - g++-4.9
   - clang++-3.5
 
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..
 
 install:
   - if [ "$CXX" == "clang++" ]; then export CXX="clang++-3.5"; fi
   - if [ "$CXX" == "g++" ]; then export CXX="g++-4.9"; fi
-  - cmake .
-  - make fcl_tests
+
 script: 
   - make ut-run
