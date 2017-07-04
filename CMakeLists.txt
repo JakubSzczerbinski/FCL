@@ -12,6 +12,8 @@ include_directories(
 	${Boost_INCLUDE_DIRS}
 )
 
+MESSAGE( STATUS "BOOST_INCLUDE_DIRS:         " ${Boost_INCLUDE_DIRS} )
+
 link_directories(lib)
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -ggdb -O0 -pthread")
