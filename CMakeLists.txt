@@ -9,7 +9,7 @@ find_package (Boost 1.55 REQUIRED)
 include_directories(
 	src
 	include
-	${BOOST_INCLUDE_DIRS}
+	${Boost_INCLUDE_DIRS}
 )
 
 link_directories(lib)
