@@ -3,17 +3,11 @@ language: cpp
 cache:
   apt: true
 
-
-matrix:
-  include:
-    - os: linux
-      dist: xenial
-
 addons:
   apt:
     sources:
-    - boost-latest
     - ubuntu-toolchain-r-test
+    - sourceline: "ppa:kzemek/boost"
     packages:
     - gcc-4.9
     - g++-4.9
