@@ -7,7 +7,7 @@ addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
-    - sourceline: "deb https://launchpad.net/ubuntu/xenial"
+    - sourceline: "http://ppa.launchpad.net/shimmerproject/ppa/ubuntu xenial main"
     packages:
     - gcc-4.9
     - g++-4.9
