@@ -13,7 +13,7 @@ addons:
     - g++-4.9
     - clang-3.5
     - clang-3.5
-    - boost1.58
+    - libboost1.58-dev
 
 compiler:
   - g++-4.9
