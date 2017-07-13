@@ -23,7 +23,7 @@ namespace detail
 	using ConnectionHandle = std::string;
 
 	/*
-	** 	FILES READ/WRITE
+	**  FILES READ/WRITE
 	*/
 
 	/* 	
@@ -63,6 +63,19 @@ namespace detail
 	**  Throws error on invalid function handle.
 	*/
 	std::vector<TypeHandle> get_arg_types(FunctionHandle hdl, error_code& ec);
+
+    /*
+    **  Creates function that takes 0 arguments and always returns value
+    **  Throws error if ValueType is unregistered.
+    */
+    template <typename ValueType>
+    FunctionHandle create_value_function(ValueType val, error_code& ec);
+
+    /*
+    **   Deletes function created with create_value_function. Returns true if delete is sucessfull
+    **   Throws error if @param hdl is invalid (is not value function handle).
+    */
+    bool delete_value_function(FunctionHandle hdl, error_code& ec);
 
 
 	/*
@@ -176,7 +189,7 @@ namespace detail
 	** 		- invalid index
 	**		- unable to cast to type T
 	*/
-	template<typename T> T* get_return(NodeHandle hdl, int index, error_code& ec);
+	template<typename T> T* get_return(NodeHandle hdl, int index, error_code& ec);                                            
 
 } // namespace fcl
 
