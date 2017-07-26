@@ -1,37 +1,20 @@
 
-#pragma once
-
-#include <set>
-#include <map>
-#include <string>
-#include <vector>
-#include <functional>
 #include <iostream>
+#include <vector>
+#include <string>
+#include <map>
 
-#include <boost/optional.hpp>
-
-namespace fcl
-{
 
 enum Tokens
 {
-	WHITESPACE,
-	PRINT,
-	DOT_OP,
-	EQ_OP,
-	STRING,
+	NONE,
+	ID,
 	NUM,
-	VAR
-};
-
-std::map<Tokens, std::string> tokensToString =
-{ {Tokens::WHITESPACE, "whitespace"}
-, {Tokens::PRINT, "print"}
-, {Tokens::DOT_OP, "."}
-, {Tokens::EQ_OP, "="}
-, {Tokens::VAR, "var"}
-, {Tokens::STRING, "string"}
-, {Tokens::NUM, "num"}
+	LEFT_PARENTHESIS,
+	RIGHT_PARENTHESIS,
+	DOT_OP,
+	EQUALS_OP,
+	COMMA_OP
 };
 
 
@@ -40,8 +23,9 @@ class Token
 public:
 	Token(Tokens type, std::string contents) : type_(type), contents_(contents) {}
 	Token(Tokens type) : Token(type, "") {}
-	std::string contents_;
+
 	Tokens type_;
+	std::string contents_;
 };
 
 bool operator == (const Token& lhs, const Token& rhs)
@@ -49,214 +33,172 @@ bool operator == (const Token& lhs, const Token& rhs)
 	return lhs.type_ == rhs.type_ && lhs.contents_ == rhs.contents_;
 }
 
-std::ostream& operator << (std::ostream& os, Token token)
+bool isLetter(char a)
 {
-	os << "(" << tokensToString[token.type_] << (token.contents_ == "" ? "" : " " + token.contents_) << ")";
-	return os;
+	return ('a' <= a && 'z' >= a) || ('A' <= a && 'Z' >= a);
 }
 
-template<typename T>
-class Lexer
+bool isWhitespace(char a)
 {
-public:
-	using lexerFun = std::function<boost::optional<T>(std::string::iterator&, std::string::iterator)>;
-	Lexer() : Lexer(std::vector<lexerFun>{}) {}
-	Lexer(std::vector<lexerFun> funcs) : funcs_(funcs) {}
-	std::vector<T> tokenize(std::string& str)
-	{
-		std::vector<T> result;
-		auto it = str.begin();
-		while (it != str.end())
-		{
-			std::string tmp(it, str.end());
-			std::cout << tmp << std::endl;
-			auto token = tokenize_(it, str.end());
-			if (token)
-			{
-				result.push_back(*token);
-			}
-			else
-			{
-				std::cout << "Parse error" << std::endl;
-				return result;
-			}
-		}
-		return result;
-	}
-	virtual ~Lexer() = default;
-protected:
-	boost::optional<T> tokenize_(std::string::iterator& it, std::string::iterator end)
-	{
-		for (auto& fun : funcs_)
-		{
-			auto result = fun(it, end);
-			if (result)
-			{
-				return result;
-			}
-		}
-		return boost::none;
-	}
-	std::vector<lexerFun> funcs_;
-};
+	return a == ' ' || a == '\n' || a =='\t';
+}
 
-class FCLLexer : public Lexer<Token>
+bool isNumber(char a)
 {
-public:
-	FCLLexer()
+	return '0' <= a && a <= '9';
+}
+
+bool isIdCharacter(char a)
+{
+	return isLetter(a) || isNumber(a) || a == '_';
+}
+
+
+
+bool parseID(std::vector<Token>& tokens, std::string::const_iterator& begin, std::string::const_iterator end)
+{
+	char firstCharacter = *begin;
+	if (!isLetter(firstCharacter))
 	{
-		for (char c = 'a'; c <= 'z'; c++)
-		{
-			letters.insert(c);
-		}		
-		for (char c = 'A'; c <= 'Z'; c++)
-		{
-			letters.insert(c);
-		}
-		for (char c = '0'; c <= '9'; c++)
-		{
-			digits.insert(c);
-		}
-		lexerFun whitespace = 
-		[](std::string::iterator& it, std::string::iterator end) -> boost::optional<Token>
-		{
-			if (it == end)
-			{
-				return boost::none;
-			}
-			if (*it != '\n' && *it != ' ' && *it != '\t')
-			{
-				return boost::none;
-			}
-			while (*it == '\n' || *it == ' ' || *it == '\t')
-			{
-				if (it == end)
-				{
-					return Token{Tokens::WHITESPACE};
-				}
-				it++;
-			}
-			return Token{Tokens::WHITESPACE};
-		};
-		lexerFun vars = 
-		[this](std::string::iterator& it, std::string::iterator end) -> boost::optional<Token>
-		{
-			if (it == end)
-			{
-				return boost::none;
-			}
-			if (letters.count(*it) || *it == '_')
-			{
-				auto begin = it;
-				it++;
-				while (letters.count(*it) || digits.count(*it) || *it == '_')
-				{
-					if (it == end)
-					{
-						return Token(Tokens::VAR, std::string(begin, it));
-					}
-					it++;
-				}
-				return Token(Tokens::VAR, std::string(begin, it));
-			}
-			return boost::none;
-		};
-		lexerFun print = 
-		[this](std::string::iterator& it, std::string::iterator end) -> boost::optional<Token>
-		{
-			size_t size = it - end;
-			std::string expectedToken = "print";
-			if (size >= expectedToken.size())
-			{
-				std::string possibleToken(it, it + expectedToken.size());
-				if (possibleToken == expectedToken)
-				{
-					it = it + expectedToken.size();
-					return Token(Tokens::PRINT);
-				}
-			}
-			return boost::none;
-		};
-		lexerFun dot_op = 
-		[this](std::string::iterator& it, std::string::iterator end) -> boost::optional<Token>
-		{
-			if (it == end)
-			{
-				return boost::none;
-			}
-			if (*it == '.')
-			{
-				it++;
-				return Token(Tokens::DOT_OP);
-			}
-			return boost::none;
-		};
-		lexerFun eq_op = 
-		[this](std::string::iterator& it, std::string::iterator end) -> boost::optional<Token>
-		{
-			if (it == end)
-			{
-				return boost::none;
-			}
-			if (*it == '=')
-			{
-				it++;
-				return Token(Tokens::EQ_OP);
-			}
-			return boost::none;
-		};
-		lexerFun string = 
-		[this](std::string::iterator& it, std::string::iterator end) -> boost::optional<Token>
-		{
-			if (it == end)
-			{
-				return boost::none;
-			}
-			if (*it == '\"')
-			{
-				it++;
-				auto begin = it;
-				while(*it != '\"')
-				{
-					if (it == end)
-					{
-						return boost::none;
-					}
-					it++;
-				}
-				return Token(Tokens::STRING, std::string(begin, it++));
-			}
-			return boost::none;
-		};
-		lexerFun num =
-		[this](std::string::iterator& it, std::string::iterator end) -> boost::optional<Token>
-		{
-			if (it == end)
-			{
-				return boost::none;
-			}
-			if (digits.count(*it))
-			{
-				auto begin = it;
-				it++;
-				while (digits.count(*it) || *it == '.')
-				{
-					if (it == end)
-					{
-						return boost::none;
-					}
-					it++;
-				}
-				return Token(Tokens::NUM, std::string(begin, it));
-			}
-			return boost::none;
-		};
-		funcs_ = {whitespace, dot_op, eq_op, print, string, num, vars};
+		return false;
 	}
-	std::set<char> letters;
-	std::set<char> digits;
+	std::string result;
+	result += firstCharacter;
+	begin++;
+	while(isIdCharacter(*begin) && begin != end)
+	{
+		result += *begin;
+		begin++;
+	}
+	auto idToken = Token(Tokens::ID, result);
+	tokens.push_back(idToken);
+	return true;
+}
 
-	
-};
+bool parseNum(std::vector<Token>& tokens, std::string::const_iterator& begin, std::string::const_iterator end)
+{
+	char firstCharacter = *begin;
+	if(!isNumber(firstCharacter))
+	{
+		return false;
+	}
 
-} // namespace fcl
+	std::string result;
+	result += firstCharacter;
+	begin++;
+	while(isNumber(*begin) && begin != end)
+	{
+		result += *begin;
+		begin++;
+	}
+	auto numToken = Token(Tokens::NUM, result);
+	tokens.push_back(numToken);
+	return true;
+
+
+}
+
+bool parseOp(std::vector<Token>& tokens, std::string::const_iterator& begin, std::string::const_iterator end)
+{
+
+	char firstCharacter = *begin;
+	Token opToken = Token{Tokens::NONE};
+
+	if(firstCharacter == '=')
+	{
+		opToken = Token{Tokens::EQUALS_OP};
+	}
+
+	if(firstCharacter == '.')
+	{
+		opToken = Token{Tokens::DOT_OP};
+	}
+
+	if(firstCharacter == ',')
+	{
+		opToken = Token{Tokens::COMMA_OP};
+	}
+
+	if(firstCharacter == '(')
+	{
+		opToken = Token{Tokens::LEFT_PARENTHESIS};
+	}
+
+	if(firstCharacter == ')')
+	{
+		opToken = Token{Tokens::RIGHT_PARENTHESIS};
+	}
+
+	if(opToken.type_ == Tokens::NONE) return false;
+	begin++;
+	tokens.push_back(opToken);
+	return true;
+
+} 
+
+bool parseOp2(std::vector<Token>& tokens, std::string::const_iterator& begin, std::string::const_iterator end)
+{
+
+	char firstCharacter = *begin;
+
+	static std::map<char, Token> charTokenMap =
+	{
+		{'=', Token(Tokens::EQUALS_OP)},
+		{'.', Token(Tokens::DOT_OP)},
+		{',', Token(Tokens::COMMA_OP)},
+		{')', Token(Tokens::LEFT_PARENTHESIS)},
+		{'(', Token(Tokens::RIGHT_PARENTHESIS)}
+	};
+
+	auto it = charTokenMap.find(firstCharacter);
+
+	if (it == charTokenMap.end())
+	{
+		return false;
+	}
+
+	tokens.push_back(it->second);
+	begin++;
+	return true;
+
+}
+
+
+std::vector<Token> tokenize(const std::string& text)
+{
+	std::vector<Token> result;
+
+	auto it = text.begin();
+	auto end = text.end();
+	while (it != text.end())
+	{
+		if (isWhitespace(*it))
+		{
+			it++;
+			continue;
+		}
+
+		if (parseID(result, it, end))
+		{
+			continue;
+		}
+
+		if (parseNum(result, it, end))
+		{
+			continue;
+		}
+
+		if (parseOp(result, it, end))
+		{
+			continue;
+		}
+
+		std::cout << "Lexer error: Unable to parse character " << *it 
+			<< " with ASCII code " << static_cast<int>(*it) << std::endl;
+
+		return {};
+
+	}
+
+	return result;
+}

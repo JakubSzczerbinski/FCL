@@ -1,59 +1,60 @@
+
+#include <ostream>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <memory>
-#include <vector>
-#include <string>
+#include <Lexer.h>
 
-#include <Lexer.hpp>
 
-class LexerTests : public ::testing::TestWithParam<std::pair<std::string, std::vector<fcl::Token>>>
+// std::ostream& operator << (std::ostream& os, const std::vector<Token>& tokens)
+// {
+// 	for (auto token : tokens)
+// 	{
+// 		os << token.type_ << "," << token.contents_ << '\n';
+// 	}
+// 	return os;
+// }
+
+TEST(LexerTests, shouldParseNumbers)
 {
-public:
-	LexerTests() 
-		: lexerPtr_(new fcl::FCLLexer())
-	{
-		auto param = GetParam();
-		inputProgram = param.first;
-		lexedTokens = param.second;
-	}
-	std::string inputProgram;
-	std::vector<fcl::Token> lexedTokens;
-	std::unique_ptr<fcl::Lexer<fcl::Token>> lexerPtr_;
-};
+	std::vector<Token> result = tokenize("1223 12312312");
 
-TEST_P (LexerTests, ShouldParseProgramProperly)
-{
-	auto tokens = lexerPtr_->tokenize(inputProgram);
+	ASSERT_EQ(result.size(), 2);
 
-	ASSERT_EQ(tokens.size(), lexedTokens.size());
+	ASSERT_EQ(result[0].type_, Tokens::NUM);
+	ASSERT_EQ(result[0].contents_, "1223");
 
-	auto size = tokens.size();
-	for (int i = 0; i < size; i++)
-	{
-		EXPECT_EQ(tokens[i], lexedTokens[i]);
-	}
+	ASSERT_EQ(result[1].type_, Tokens::NUM);	
+	ASSERT_EQ(result[1].contents_, "12312312");
 }
 
-std::vector<std::pair<std::string, std::vector<fcl::Token>>> getTestArgs()
+TEST(LexerTests, shouldParseID)
 {
-	std::vector<std::pair<std::string, std::vector<fcl::Token>>> res;
-	res.push_back(
-	{
-	R"***(
-		ConcatNode concat 
-	)***",
-	{ {fcl::Tokens::WHITESPACE}
-	, {fcl::Tokens::VAR, "ConcatNode"}
-	, {fcl::Tokens::WHITESPACE}
-	, {fcl::Tokens::VAR, "concat"}
-	, {fcl::Tokens::WHITESPACE}}
-	});
-	return res;
+	std::vector<Token> result = tokenize("a124  A_D__	xxx	");
+
+	ASSERT_EQ(result.size(), 3);
+
+	ASSERT_EQ(result[0].type_, Tokens::ID);
+	ASSERT_EQ(result[0].contents_, "a124");
+
+	ASSERT_EQ(result[1].type_, Tokens::ID);	
+	ASSERT_EQ(result[1].contents_, "A_D__");
+
+	ASSERT_EQ(result[2].type_, Tokens::ID);	
+	ASSERT_EQ(result[2].contents_, "xxx");
 }
 
-INSTANTIATE_TEST_CASE_P(ValidTests,
-                        LexerTests,
-                        ::testing::ValuesIn(getTestArgs()));
+TEST(LexerTests, shouldParse)
+{
+	std::vector<Token> expected = 
+	{
+		{Tokens::ID, "a1"},
+		{Tokens::LEFT_PARENTHESIS},
+		{Tokens::NUM, "24"},
+		{Tokens::RIGHT_PARENTHESIS}
+	};
+	std::vector<Token> result = tokenize("a1(24)");
 
-
+	ASSERT_EQ(result, expected);
+}
