@@ -48,7 +48,7 @@ TEST(LexerTests, shouldParse)
 		{Tokens::NUM, "24"},
 		{Tokens::RIGHT_PARENTHESIS}
 	};
-	std::vector<Token> result = tokenize("a11(24)");
+	std::vector<Token> result = tokenize("a1(24)");
 
 	ASSERT_EQ(result, expected);
 }
