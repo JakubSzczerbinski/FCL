@@ -7,14 +7,8 @@
 #include <Lexer.hpp>
 
 
-// std::ostream& operator << (std::ostream& os, const std::vector<Token>& tokens)
-// {
-// 	for (auto token : tokens)
-// 	{
-// 		os << token.type_ << "," << token.contents_ << '\n';
-// 	}
-// 	return os;
-// }
+namespace fcl
+{
 
 TEST(LexerTests, shouldParseNumbers)
 {
@@ -54,7 +48,9 @@ TEST(LexerTests, shouldParse)
 		{Tokens::NUM, "24"},
 		{Tokens::RIGHT_PARENTHESIS}
 	};
-	std::vector<Token> result = tokenize("a1(24)");
+	std::vector<Token> result = tokenize("a11(24)");
 
 	ASSERT_EQ(result, expected);
+}
+
 }
