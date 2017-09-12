@@ -56,14 +56,14 @@ class Logger {
   template<typename M, typename ... Ms>
   Logger& printLogMessage(const M& msg, const Ms& ... messages)
   {
-    fprintf(stderr, "%s ", msg);
+    fprintf(stderr, "%s ", std::to_string(msg));
     printLogMessage(messages ...);
     return *this;
   }
   template <typename M>
   Logger& printLogMessage(const M& msg)
   {
-    fprintf(stderr, "%s ", msg);
+    fprintf(stderr, "%s ", std::to_string(msg));
     return *this;
   }
   std::vector<std::string> origin_;
