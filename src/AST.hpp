@@ -57,8 +57,8 @@ class AST
 
     NodeHandle get_return_node(LinkHandle hdl, error_code& ec);
 
-    LinkHandle create_link(NodeHandle return_hdl, int return_index,
-                                       NodeHandle arg_hdl, int arg_index,
+    LinkHandle create_link(NodeHandle return_hdl, unsigned int return_index,
+                                       NodeHandle arg_hdl, unsigned int arg_index,
                                        error_code& ec);
 
     bool delete_link(LinkHandle hdl, error_code& ec);
@@ -70,27 +70,50 @@ private:
 
     struct Function
     {
-        IFunction* function;
+        IFunction* function_;
     };
 
     struct Link
     {
-        NodeHandle inNode;
-        NodeHandle outNode;
+        NodeHandle inNode_;
+        NodeHandle outNode_;
+
+        unsigned int inIndex_;
+        unsigned int outIndex_;
+
+        Link(NodeHandle inNode, NodeHandle outNode, unsigned int inIndex,
+            unsigned int outIndex)
+        : inNode_(inNode),
+            outNode_(outNode),
+            inIndex_(inIndex),
+            outIndex_(outIndex)
+        {
+        };
     };
 
     struct Node
     {
-        std::string prettyName;
-        FunctionHandle nodeFunction;
+        std::string prettyName_;
+        FunctionHandle nodeFunction_;
+        unsigned int argNumber_;
+        unsigned int retNumber_;
+
+        Node(std::string prettyName, FunctionHandle nodeFunction, unsigned int argNumber,
+            unsigned int retNumber)
+        : prettyName_(prettyName),
+            nodeFunction_(nodeFunction),
+            argNumber_(argNumber),
+            retNumber_(retNumber)
+        {
+        };
     };
 
     std::map<FunctionHandle, Function> functionMap;
 
     std::map<LinkHandle, Link> linkMap;
-    
+
     std::map<NodeHandle, Node> nodeMap;
-    
+
     std::map<TypeHandle, boost::typeindex::type_index> typeMap;
     std::map<boost::typeindex::type_index, TypeHandle> reverseTypeMap;
 };

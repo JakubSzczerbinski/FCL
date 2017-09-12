@@ -64,7 +64,7 @@ namespace fcl
         return {};
     }
 
-    std::vector<ConnectionHandle> get_arg_connections(NodeHandle hdl, error_code& ec)
+    std::vector<LinkHandle> get_arg_links(NodeHandle hdl, error_code& ec)
     {
         ec = error_code::not_implemented;
         return {};
@@ -94,27 +94,27 @@ namespace fcl
         return false;
     }
 
-    int get_argument_index(ConnectionHandle hdl)
+    int get_argument_index(LinkHandle hdl)
     {
         return -1;
     }
 
-    NodeHandle get_argument_node(ConnectionHandle hdl)
+    NodeHandle get_argument_node(LinkHandle hdl)
     {
         return "";
     }
 
-    int get_return_index(ConnectionHandle hdl)
+    int get_return_index(LinkHandle hdl)
     {
         return -1;
     }
 
-    NodeHandle get_return_node(ConnectionHandle hdl)
+    NodeHandle get_return_node(LinkHandle hdl)
     {
         return "";
     }
 
-    ConnectionHandle create_connection(NodeHandle return_hdl, int return_index,
+    LinkHandle create_link(NodeHandle return_hdl, int return_index,
                                        NodeHandle arg_hdl, int arg_index,
                                        error_code& ec)
     {
@@ -122,7 +122,7 @@ namespace fcl
         return "";
     }
 
-    bool delete_connection(ConnectionHandle hdl, error_code& ec)
+    bool delete_link(LinkHandle hdl, error_code& ec)
     {
         ec = error_code::not_implemented;
         return false;
