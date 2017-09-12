@@ -11,8 +11,12 @@ namespace detail
 {
 	enum error_code
 	{
+		invalid_handle,
+		node_not_found,
+		not_implemented,
 		success,
-		not_implemented
+		type_not_found,
+		link_not_found
 	};
 } // namespace detail
 
@@ -20,7 +24,7 @@ namespace detail
 	using FunctionHandle = std::string;
 	using TypeHandle = std::string;
 	using NodeHandle = std::string;
-	using ConnectionHandle = std::string;
+	using LinkHandle = std::string;
 
 	/*
 	**  FILES READ/WRITE
@@ -99,11 +103,11 @@ namespace detail
 	std::vector<NodeHandle> get_nodes();
 
 	/*
-	**	Returns handles to all connections that end as args in @param hdl.
+	**	Returns handles to all links that end as args in @param hdl.
 	**	Throws error on invalid handle.
-	** 	Note: Calling this function for all nodes gives you unique list of all connections.
+	** 	Note: Calling this function for all nodes gives you unique list of all links.
 	*/
-	std::vector<ConnectionHandle> get_arg_connections(NodeHandle hdl, error_code& ec);
+	std::vector<LinkHandle> get_arg_links(NodeHandle hdl, error_code& ec);
 
 	/*
 	**	Returns human readable name of the node.
@@ -125,7 +129,7 @@ namespace detail
 	NodeHandle create_node(FunctionHandle hdl, error_code& ec);
 
 	/*
-	** 	Deleted node.
+	** 	Deletes node.
 	**	Returns true on succesfull delete, returns false on unsuccesfull delete.
 	**	Throws error on invalid handle.
 	*/
@@ -133,49 +137,49 @@ namespace detail
 
 
 	/*
-	**  CONNECTIONS
+	**  LINKS
 	*/
 
 	/*
-	**  Returns index of argument at connection arg endpoint or -1 on error.
+	**  Returns index of argument at link arg endpoint or -1 on error.
 	**  Throws error on invalid hdl.
 	*/
-	int get_argument_index(ConnectionHandle hdl);
+	int get_argument_index(LinkHandle hdl, error_code& ec);
 
 	/*
-	**	Returns handle to node at connection arg endpoint.
+	**	Returns handle to node at link arg endpoint.
 	**	Throws error on invalid hdl.
 	*/
-	NodeHandle get_argument_node(ConnectionHandle hdl);
+	NodeHandle get_argument_node(LinkHandle hdl, error_code& ec);
 
 	/*
-	**  Returns index of return at connection return endpoint or -1 on error.
+	**  Returns index of return at link return endpoint or -1 on error.
 	**  Throws error on invalid hdl.
 	*/
-	int  get_return_index(ConnectionHandle hdl);
+	int  get_return_index(LinkHandle hdl, error_code& ec);
 
 	/*
-	**	Returns handle to node at connection return endpoint.
+	**	Returns handle to node at link return endpoint.
 	**	Throws error on invalid hdl.
 	*/
-	NodeHandle get_return_node(ConnectionHandle hdl);
+	NodeHandle get_return_node(LinkHandle hdl, error_code& ec);
 
 	/*
-	**	Creates connection with @param return_hdl, @param return_index as return endpoint
+	**	Creates link with @param return_hdl, @param return_index as return endpoint
 	** 	and @param arg_hdl, @param arg_index as argument endpoint
-	**  Returns handle to this connection.
+	**  Returns handle to this link.
 	**	Throws error on invalid handle or index
 	*/
-	ConnectionHandle create_connection(NodeHandle return_hdl, int return_index,
+	LinkHandle create_link(NodeHandle return_hdl, int return_index,
 									   NodeHandle arg_hdl, int arg_index,
 									   error_code& ec);
 
 	/*
-	** 	Deleted connection.
+	** 	Deleted link.
 	**	Returns true on succesfull delete, returns false on unsuccesfull delete.
 	**	Throws error on invalid handle.
 	*/
-	bool delete_connection(ConnectionHandle hdl, error_code& ec);
+	bool delete_link(LinkHandle hdl, error_code& ec);
 
 
 	/*

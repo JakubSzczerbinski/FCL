@@ -1,10 +1,15 @@
+#pragma once
 
-#include <vector>
+#include <map>
 #include <string>
+#include <vector>
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
+#include <IFunction.hpp>
 #include <fcl.hpp>
-
-
 
 namespace fcl
 {
@@ -32,7 +37,7 @@ class AST
 
     std::vector<NodeHandle> get_nodes();
 
-    std::vector<ConnectionHandle> get_arg_connections(NodeHandle hdl, error_code& ec);
+    std::vector<LinkHandle> get_arg_links(NodeHandle hdl, error_code& ec);
 
     std::string get_node_pretty_name(NodeHandle hdl, error_code& ec);
 
@@ -44,19 +49,50 @@ class AST
 
     
 
-    int get_argument_index(ConnectionHandle hdl);
+    int get_argument_index(LinkHandle hdl, error_code& ec);
 
-    NodeHandle get_argument_node(ConnectionHandle hdl);
+    NodeHandle get_argument_node(LinkHandle hdl, error_code& ec);
 
-    int  get_return_index(ConnectionHandle hdl);
+    int  get_return_index(LinkHandle hdl, error_code& ec);
 
-    NodeHandle get_return_node(ConnectionHandle hdl);
+    NodeHandle get_return_node(LinkHandle hdl, error_code& ec);
 
-    ConnectionHandle create_connection(NodeHandle return_hdl, int return_index,
+    LinkHandle create_link(NodeHandle return_hdl, int return_index,
                                        NodeHandle arg_hdl, int arg_index,
                                        error_code& ec);
 
-    bool delete_connection(ConnectionHandle hdl, error_code& ec);
+    bool delete_link(LinkHandle hdl, error_code& ec);
+
+
+private:
+
+    boost::uuids::random_generator generator;
+
+    struct Function
+    {
+        IFunction* function;
+    };
+
+    struct Link
+    {
+        NodeHandle inNode;
+        NodeHandle outNode;
+    };
+
+    struct Node
+    {
+        std::string prettyName;
+        FunctionHandle nodeFunction;
+    };
+
+    std::map<FunctionHandle, Function> functionMap;
+
+    std::map<LinkHandle, Link> linkMap;
+    
+    std::map<NodeHandle, Node> nodeMap;
+    
+    std::map<TypeHandle, boost::typeindex::type_index> typeMap;
+    std::map<boost::typeindex::type_index, TypeHandle> reverseTypeMap;
 };
 
 } // namespace fcl
