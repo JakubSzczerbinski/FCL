@@ -29,11 +29,11 @@ namespace fcl
 
 		if(it == functionMap.end())
 		{
-			ec = error_code::not_implemented;
+			ec = error_code::function_not_found;
 			return "";
 		}
 		
-		return it->second.function->name();
+		return it->second.function_->name();
 	}
 
 	std::vector<TypeHandle> AST::get_return_types(FunctionHandle hdl, error_code& ec) const
@@ -48,7 +48,7 @@ namespace fcl
 			return result;
 		}
 
-		TypeVector typeVector = it->second.function->outputArgs();
+		TypeVector typeVector = it->second.function_->outputArgs();
 
 		for(auto t : typeVector)
 			result.push_back(reverseTypeMap.at(t));
@@ -68,7 +68,7 @@ namespace fcl
 			return result;
 		}
 
-		TypeVector typeVector = it->second.function->inputArgs();
+		TypeVector typeVector = it->second.function_->inputArgs();
 
 		for(auto t : typeVector)
 			result.push_back(reverseTypeMap.at(t));
@@ -125,7 +125,7 @@ namespace fcl
     	}
 
     	for(auto lhdl : linkMap)
-    		if(lhdl.second.outNode == hdl)
+    		if(lhdl.second.outNode_ == hdl)
     			result.push_back(lhdl.first);
 
     	return result;
@@ -141,7 +141,7 @@ namespace fcl
 			return "";
 		}
 		
-		return it->second.prettyName;
+		return it->second.prettyName_;
     }
 
     FunctionHandle AST::get_node_function(NodeHandle hdl, error_code& ec) const
@@ -154,12 +154,14 @@ namespace fcl
     		return "";
     	}
 
-    	return it->second.nodeFunction;
+    	return it->second.nodeFunction_;
     }
 
     NodeHandle AST::create_node(FunctionHandle hdl, error_code& ec)
     {
-    	if(functionMap.find(hdl) == functionMap.end())
+    	auto it = functionMap.find(hdl);
+
+    	if(it == functionMap.end())
     	{
     		ec = error_code::invalid_handle;
     		return "";
@@ -168,7 +170,12 @@ namespace fcl
     	boost::uuids::uuid name = generator();
     	std::string nhdl = boost::uuids::to_string(name);
 
-    	nodeMap.insert(std::pair<NodeHandle, Node>(nhdl, Node()));
+        auto function = it->second.function_;
+
+        auto argNumber = function->inputArgs().size();
+        auto retNumber = function->outputArgs().size();
+
+    	nodeMap.insert(std::pair<NodeHandle, Node>(nhdl, Node(nhdl, hdl, argNumber, retNumber)));
 
     	return nhdl;
     }
@@ -193,7 +200,15 @@ namespace fcl
 
     int AST::get_argument_index(LinkHandle hdl, error_code& ec) const
     {
-    	// TODO
+    	auto it = linkMap.find(hdl);
+
+    	if(it == linkMap.end())
+    	{
+    		ec = error_code::invalid_handle;
+    		return -1;
+    	}
+
+    	return it->second.inIndex_;
     }
 
     NodeHandle AST::get_argument_node(LinkHandle hdl, error_code& ec) const
@@ -206,12 +221,20 @@ namespace fcl
     		return "";
     	}
 
-    	return it->second.inNode;
+    	return it->second.inNode_;
     }
 
     int  AST::get_return_index(LinkHandle hdl, error_code& ec) const
     {
-    	// TODO
+    	auto it = linkMap.find(hdl);
+
+    	if(it == linkMap.end())
+    	{
+    		ec = error_code::invalid_handle;
+    		return -1;
+    	}
+
+    	return it->second.outIndex_;
     }
 
     NodeHandle AST::get_return_node(LinkHandle hdl, error_code& ec) const
@@ -224,14 +247,33 @@ namespace fcl
     		return "";
     	}
 
-    	return it->second.outNode;
+    	return it->second.outNode_;
     }
 
-    LinkHandle AST::create_link(NodeHandle return_hdl, int return_index,
-                                       NodeHandle arg_hdl, int arg_index,
+    LinkHandle AST::create_link(NodeHandle return_hdl, unsigned int return_index,
+                                       NodeHandle arg_hdl, unsigned int arg_index,
                                        error_code& ec)
     {
-    	//TODO
+    	if(nodeMap.find(return_hdl) == nodeMap.end() || nodeMap.find(arg_hdl) == nodeMap.end())
+    	{
+    		ec = error_code::invalid_handle;
+    		return "";
+    	}
+
+    	if(nodeMap.find(return_hdl)->second.retNumber_ <= return_index &&
+    		nodeMap.find(arg_hdl)->second.argNumber_ <= arg_index)
+    	{
+    		ec = error_code::invalid_index;
+    		return "";
+    	}
+
+    	boost::uuids::uuid name = generator();
+    	std::string lhdl = boost::uuids::to_string(name);
+
+    	linkMap.insert(std::pair<LinkHandle, Link>(lhdl, Link(
+    		return_hdl, arg_hdl, return_index, arg_index)));
+
+    	return lhdl;
     }
 
     bool AST::delete_link(LinkHandle hdl, error_code& ec)
