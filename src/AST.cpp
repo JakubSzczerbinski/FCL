@@ -3,7 +3,17 @@
 
 namespace fcl
 {
-	std::vector<FunctionHandle> AST::get_functions()
+    AST::AST(std::vector<IFunction*> functions)
+    {
+        for (auto func : functions)
+        {
+            boost::uuids::uuid name = generator();
+            std::string nhdl = boost::uuids::to_string(name);
+            functionMap.emplace(std::make_pair(nhdl, Function{func}));
+        }
+    }
+
+	std::vector<FunctionHandle> AST::get_functions() const
 	{
 		std::vector<FunctionHandle> result;
 
@@ -13,7 +23,7 @@ namespace fcl
 		return result;
 	}
 
-	std::string AST::get_function_pretty_name(FunctionHandle hdl, error_code& ec)
+	std::string AST::get_function_pretty_name(FunctionHandle hdl, error_code& ec) const
 	{
 		auto it = functionMap.find(hdl);
 
@@ -26,7 +36,7 @@ namespace fcl
 		return it->second.function->name();
 	}
 
-	std::vector<TypeHandle> AST::get_return_types(FunctionHandle hdl, error_code& ec)
+	std::vector<TypeHandle> AST::get_return_types(FunctionHandle hdl, error_code& ec) const
 	{
 		std::vector<TypeHandle> result;
 
@@ -41,12 +51,12 @@ namespace fcl
 		TypeVector typeVector = it->second.function->outputArgs();
 
 		for(auto t : typeVector)
-			result.push_back(reverseTypeMap[t]);
+			result.push_back(reverseTypeMap.at(t));
 
 		return result;
 	}
 
-	std::vector<TypeHandle> AST::get_arg_types(FunctionHandle hdl, error_code& ec)
+	std::vector<TypeHandle> AST::get_arg_types(FunctionHandle hdl, error_code& ec) const
 	{
 		std::vector<TypeHandle> result;
 
@@ -61,7 +71,7 @@ namespace fcl
 		TypeVector typeVector = it->second.function->inputArgs();
 
 		for(auto t : typeVector)
-			result.push_back(reverseTypeMap[t]);
+			result.push_back(reverseTypeMap.at(t));
 
 		return result;
 	}
@@ -79,7 +89,7 @@ namespace fcl
 
 
 
-	std::string AST::get_type_pretty_name(TypeHandle hdl, error_code& ec)
+	std::string AST::get_type_pretty_name(TypeHandle hdl, error_code& ec) const
 	{
 		auto it = typeMap.find(hdl);
 
@@ -94,7 +104,7 @@ namespace fcl
 
 
 
-	std::vector<NodeHandle> AST::get_nodes()
+	std::vector<NodeHandle> AST::get_nodes() const
 	{
 		std::vector<NodeHandle> result;
 
@@ -104,7 +114,7 @@ namespace fcl
 		return result;
 	}
 
-    std::vector<LinkHandle> AST::get_arg_links(NodeHandle hdl, error_code& ec)
+    std::vector<LinkHandle> AST::get_arg_links(NodeHandle hdl, error_code& ec) const
     {
     	std::vector<LinkHandle> result;
 
@@ -121,7 +131,7 @@ namespace fcl
     	return result;
     }
 
-    std::string AST::get_node_pretty_name(NodeHandle hdl, error_code& ec)
+    std::string AST::get_node_pretty_name(NodeHandle hdl, error_code& ec) const
     {
     	auto it = nodeMap.find(hdl);
 
@@ -134,7 +144,7 @@ namespace fcl
 		return it->second.prettyName;
     }
 
-    FunctionHandle AST::get_node_function(NodeHandle hdl, error_code& ec)
+    FunctionHandle AST::get_node_function(NodeHandle hdl, error_code& ec) const
     {
     	auto it = nodeMap.find(hdl);
 
@@ -181,12 +191,12 @@ namespace fcl
     }
 
 
-    int AST::get_argument_index(LinkHandle hdl, error_code& ec)
+    int AST::get_argument_index(LinkHandle hdl, error_code& ec) const
     {
     	// TODO
     }
 
-    NodeHandle AST::get_argument_node(LinkHandle hdl, error_code& ec)
+    NodeHandle AST::get_argument_node(LinkHandle hdl, error_code& ec) const
     {
     	auto it = linkMap.find(hdl);
 
@@ -199,12 +209,12 @@ namespace fcl
     	return it->second.inNode;
     }
 
-    int  AST::get_return_index(LinkHandle hdl, error_code& ec)
+    int  AST::get_return_index(LinkHandle hdl, error_code& ec) const
     {
     	// TODO
     }
 
-    NodeHandle AST::get_return_node(LinkHandle hdl, error_code& ec)
+    NodeHandle AST::get_return_node(LinkHandle hdl, error_code& ec) const
     {
     	auto it = linkMap.find(hdl);
 

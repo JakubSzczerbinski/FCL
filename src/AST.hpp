@@ -16,13 +16,17 @@ namespace fcl
 
 class AST
 {
-    std::vector<FunctionHandle> get_functions();
+public:
+    AST(std::vector<IFunction*> functions);
 
-    std::string get_function_pretty_name(FunctionHandle hdl, error_code& ec);
 
-    std::vector<TypeHandle> get_return_types(FunctionHandle hdl, error_code& ec);
+    std::vector<FunctionHandle> get_functions() const;
 
-    std::vector<TypeHandle> get_arg_types(FunctionHandle hdl, error_code& ec);
+    std::string get_function_pretty_name(FunctionHandle hdl, error_code& ec) const;
+
+    std::vector<TypeHandle> get_return_types(FunctionHandle hdl, error_code& ec) const;
+
+    std::vector<TypeHandle> get_arg_types(FunctionHandle hdl, error_code& ec) const;
 
     template <typename ValueType>
     FunctionHandle create_value_function(ValueType val, error_code& ec);
@@ -31,17 +35,17 @@ class AST
 
 
 
-    std::string get_type_pretty_name(TypeHandle hdl, error_code& ec);
+    std::string get_type_pretty_name(TypeHandle hdl, error_code& ec) const;
 
 
 
-    std::vector<NodeHandle> get_nodes();
+    std::vector<NodeHandle> get_nodes() const;
 
-    std::vector<LinkHandle> get_arg_links(NodeHandle hdl, error_code& ec);
+    std::vector<LinkHandle> get_arg_links(NodeHandle hdl, error_code& ec) const;
 
-    std::string get_node_pretty_name(NodeHandle hdl, error_code& ec);
+    std::string get_node_pretty_name(NodeHandle hdl, error_code& ec) const;
 
-    FunctionHandle get_node_function(NodeHandle hdl, error_code& ec);
+    FunctionHandle get_node_function(NodeHandle hdl, error_code& ec) const;
 
     NodeHandle create_node(FunctionHandle hdl, error_code& ec);
 
@@ -49,13 +53,13 @@ class AST
 
     
 
-    int get_argument_index(LinkHandle hdl, error_code& ec);
+    int get_argument_index(LinkHandle hdl, error_code& ec) const;
 
-    NodeHandle get_argument_node(LinkHandle hdl, error_code& ec);
+    NodeHandle get_argument_node(LinkHandle hdl, error_code& ec) const;
 
-    int  get_return_index(LinkHandle hdl, error_code& ec);
+    int  get_return_index(LinkHandle hdl, error_code& ec) const;
 
-    NodeHandle get_return_node(LinkHandle hdl, error_code& ec);
+    NodeHandle get_return_node(LinkHandle hdl, error_code& ec) const;
 
     LinkHandle create_link(NodeHandle return_hdl, int return_index,
                                        NodeHandle arg_hdl, int arg_index,

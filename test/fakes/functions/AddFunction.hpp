@@ -3,22 +3,22 @@
 #include <cassert>
 
 #include <IFunction.hpp>
-#include <TypeIndexHelpers.hpp>
+#include <FunctionHelpers.hpp>
 
 namespace fcl
 {
 
-class AddFunction : IFunction
+class AddFunction : public IFunction
 {
 	std::vector<std::unique_ptr<nonType>> call(std::vector<nonType*> args) override
 	{
 		assert(args.size() == 2);
-		int& lhs = *reinterpret_cast<int*>(args[0]);
-		int& rhs = *reinterpret_cast<int*>(args[1]);
+		const int& lhs = get_argument<int>(args, 0);
+		const int& rhs = get_argument<int>(args, 1);
 
 		int* result = new int(lhs + rhs);
 
-		return {std::unique_ptr<nonType>(reinterpret_cast<nonType*>(result))};
+		return make_return_vector(result);
 	}
 	TypeVector inputArgs() override
 	{

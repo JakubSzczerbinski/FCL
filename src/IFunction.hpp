@@ -10,13 +10,16 @@
 namespace fcl
 {
 
+using ReturnVector = std::vector<std::unique_ptr<nonType, std::function<void(nonType*)>>>;
+
 class IFunction
 {
 public:
-	virtual std::vector<std::unique_ptr<nonType>> call(std::vector<nonType*>) = 0;
+	virtual ReturnVector call(std::vector<nonType*>) = 0;
 	virtual TypeVector inputArgs() = 0;
 	virtual TypeVector outputArgs() = 0;
 	virtual std::string name() = 0;
+	virtual ~IFunction() = default;
 };
 
 } // namespace fcl
