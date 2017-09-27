@@ -18,7 +18,9 @@ namespace detail
 		type_not_found,
 		link_not_found,
 		function_not_found,
-		invalid_index
+		invalid_index,
+		type_not_supported,
+		operation_permitted
 	};
 } // namespace detail
 

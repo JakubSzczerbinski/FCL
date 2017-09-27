@@ -17,7 +17,7 @@ namespace fcl
 class AST
 {
 public:
-    AST(std::vector<IFunction*> functions);
+    AST(std::vector<std::unique_ptr<IFunction>>&& functions);
 
 
     std::vector<FunctionHandle> get_functions() const;
@@ -29,7 +29,7 @@ public:
     std::vector<TypeHandle> get_arg_types(FunctionHandle hdl, error_code& ec) const;
 
     template <typename ValueType>
-    FunctionHandle create_value_function(ValueType val, error_code& ec);
+    FunctionHandle create_value_function(ValueType&& val, error_code& ec);
 
     bool delete_value_function(FunctionHandle hdl, error_code& ec);
 
@@ -72,9 +72,16 @@ private:
 
     boost::uuids::random_generator generator;
 
+    enum FunctionType
+    {
+        SYSTEM_CREATED,
+        USER_CREATED
+    };
+
     struct Function
     {
-        IFunction* function_;
+        FunctionType type;
+        std::unique_ptr<IFunction> function_;
     };
 
     struct Link

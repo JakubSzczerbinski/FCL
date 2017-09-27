@@ -114,23 +114,15 @@ namespace fcl
         return "";
     }
 
-<<<<<<< HEAD
     LinkHandle create_link(NodeHandle return_hdl, int return_index,
-=======
-    LinkHandle create_connection(NodeHandle return_hdl, int return_index,
->>>>>>> 678c181236f3bd28166b346ec449838efa94df5b
-                                       NodeHandle arg_hdl, int arg_index,
-                                       error_code& ec)
+                           NodeHandle arg_hdl, int arg_index,
+                           error_code& ec)
     {
         ec = error_code::not_implemented;
         return "";
     }
 
-<<<<<<< HEAD
-    bool delete_link(LinkHandle hdl, error_code& ec)
-=======
     bool delete_connection(LinkHandle hdl, error_code& ec)
->>>>>>> 678c181236f3bd28166b346ec449838efa94df5b
     {
         ec = error_code::not_implemented;
         return false;

@@ -1,15 +1,16 @@
 
 #include <AST.hpp>
+#include <FunctionHelpers.hpp>
 
 namespace fcl
 {
-    AST::AST(std::vector<IFunction*> functions)
+    AST::AST(std::vector<std::unique_ptr<IFunction>>&& functions)
     {
-        for (auto func : functions)
+        for (auto& func : functions)
         {
             boost::uuids::uuid name = generator();
             std::string nhdl = boost::uuids::to_string(name);
-            functionMap.emplace(std::make_pair(nhdl, Function{func}));
+            functionMap.emplace(std::make_pair(nhdl, Function{FunctionType::SYSTEM_CREATED, std::move(func)}));
         }
     }
 
@@ -17,7 +18,7 @@ namespace fcl
 	{
 		std::vector<FunctionHandle> result;
 
-		for(auto fhdl : functionMap)
+		for(auto& fhdl : functionMap)
 			result.push_back(fhdl.first);
 
 		return result;
@@ -77,14 +78,47 @@ namespace fcl
 	}
 
 	template <typename ValueType>
-	FunctionHandle AST::create_value_function(ValueType val, error_code& ec)
+	FunctionHandle AST::create_value_function(ValueType&& val, error_code& ec)
 	{
-		// TODO
+        auto returnType = bti::type_id<ValueType>();
+
+        auto it = std::find_if(typeMap.begin(), typeMap.end(), 
+            [&returnType](const std::pair<TypeHandle, boost::typeindex::type_index>& el)
+            {
+                return el.second == returnType;
+            });
+
+        if (it == typeMap.end())
+        {
+            ec = error_code::type_not_supported;
+            return "";
+        }
+
+        auto functionObject = make_value_function(val);
+
+        boost::uuids::uuid name = generator();
+        std::string nhdl = boost::uuids::to_string(name);
+        functionMap.emplace(std::make_pair(nhdl, Function{FunctionType::USER_CREATED, std::move(functionObject)}));
 	}
 
 	bool AST::delete_value_function(FunctionHandle hdl, error_code& ec)
 	{
-		// TODO
+		auto it = functionMap.find(hdl);
+
+        if (it == functionMap.end())
+        {
+            ec = error_code::invalid_handle;
+            return false;
+        }
+
+        if (it->second.type == FunctionType::USER_CREATED)
+        {
+            functionMap.erase(it);
+            return true;
+        }
+
+        ec = error_code::operation_permitted;
+        return false;
 	}
 
 
@@ -170,7 +204,7 @@ namespace fcl
     	boost::uuids::uuid name = generator();
     	std::string nhdl = boost::uuids::to_string(name);
 
-        auto function = it->second.function_;
+        auto& function = it->second.function_;
 
         auto argNumber = function->inputArgs().size();
         auto retNumber = function->outputArgs().size();
