@@ -171,7 +171,7 @@ namespace fcl
 
 		if(it == nodeMap.end())
 		{
-			ec = error_code::node_not_found;
+			ec = error_code::invalid_handle;
 			return "";
 		}
 		
@@ -221,7 +221,7 @@ namespace fcl
 
     	if(it == nodeMap.end())
     	{
-    		ec = error_code::node_not_found;
+    		ec = error_code::invalid_handle;
     		return false;
     	}
 

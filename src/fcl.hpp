@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace fcl
 {
@@ -11,10 +12,10 @@ namespace detail
 {
 	enum error_code
 	{
+		success = 0,
 		invalid_handle,
 		node_not_found,
 		not_implemented,
-		success,
 		type_not_found,
 		link_not_found,
 		function_not_found,
