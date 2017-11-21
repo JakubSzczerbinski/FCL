@@ -4,7 +4,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <Lexer.hpp>
+#include <Parser/Lexer.hpp>
 
 
 namespace fcl

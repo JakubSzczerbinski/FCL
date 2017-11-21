@@ -13,15 +13,15 @@ namespace detail
 	enum error_code
 	{
 		success = 0,
-		invalid_handle,
-		node_not_found,
-		not_implemented,
-		type_not_found,
-		link_not_found,
-		function_not_found,
-		invalid_index,
-		type_not_supported,
-		operation_permitted
+		invalid_handle = 1,
+		node_not_found = 2,
+		not_implemented = 3,
+		type_not_found = 4,
+		link_not_found = 5,
+		function_not_found = 6,
+		invalid_index = 7,
+		type_not_supported = 8,
+		operation_permitted = 9
 	};
 } // namespace detail
 
@@ -198,7 +198,7 @@ namespace detail
 	** 		- invalid index
 	**		- unable to cast to type T
 	*/
-	template<typename T> T* get_return(NodeHandle hdl, int index, error_code& ec);                                            
+	template<typename T> T get_return(NodeHandle hdl, int index, error_code& ec);                                            
 
 } // namespace fcl
 

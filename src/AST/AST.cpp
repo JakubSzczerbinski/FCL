@@ -1,6 +1,5 @@
 
-#include <AST.hpp>
-#include <FunctionHelpers.hpp>
+#include "AST.hpp"
 
 namespace fcl
 {
@@ -8,10 +7,31 @@ namespace fcl
     {
         for (auto& func : functions)
         {
+            for (auto&& type : func->inputArgs())
+            {
+                add_type(type);
+            }
+            for (auto&& type : func->outputArgs())
+            {
+                add_type(type);
+            }
             boost::uuids::uuid name = generator();
             std::string nhdl = boost::uuids::to_string(name);
             functionMap.emplace(std::make_pair(nhdl, Function{FunctionType::SYSTEM_CREATED, std::move(func)}));
         }
+    }
+
+    IFunction* AST::get_function_from_handle(FunctionHandle hdl, error_code& ec) const
+    {
+        auto it = functionMap.find(hdl);
+
+        if (it == functionMap.end())
+        {
+            ec = error_code::function_not_found;
+            return nullptr;
+        }
+
+        return it->second.function_.get();
     }
 
 	std::vector<FunctionHandle> AST::get_functions() const
@@ -39,11 +59,10 @@ namespace fcl
 
 	std::vector<TypeHandle> AST::get_return_types(FunctionHandle hdl, error_code& ec) const
 	{
-		std::vector<TypeHandle> result;
+		std::vector<TypeHandle> result{};
+        auto it = functionMap.find(hdl);
 
-		auto it = functionMap.find(hdl);
-
-		if(it == functionMap.end())
+        if(it == functionMap.end())
 		{
 			ec = error_code::invalid_handle;
 			return result;
@@ -52,8 +71,8 @@ namespace fcl
 		TypeVector typeVector = it->second.function_->outputArgs();
 
 		for(auto t : typeVector)
-			result.push_back(reverseTypeMap.at(t));
-
+        	result.push_back(reverseTypeMap.at(t));
+        
 		return result;
 	}
 
@@ -75,30 +94,6 @@ namespace fcl
 			result.push_back(reverseTypeMap.at(t));
 
 		return result;
-	}
-
-	template <typename ValueType>
-	FunctionHandle AST::create_value_function(ValueType&& val, error_code& ec)
-	{
-        auto returnType = bti::type_id<ValueType>();
-
-        auto it = std::find_if(typeMap.begin(), typeMap.end(), 
-            [&returnType](const std::pair<TypeHandle, boost::typeindex::type_index>& el)
-            {
-                return el.second == returnType;
-            });
-
-        if (it == typeMap.end())
-        {
-            ec = error_code::type_not_supported;
-            return "";
-        }
-
-        auto functionObject = make_value_function(val);
-
-        boost::uuids::uuid name = generator();
-        std::string nhdl = boost::uuids::to_string(name);
-        functionMap.emplace(std::make_pair(nhdl, Function{FunctionType::USER_CREATED, std::move(functionObject)}));
 	}
 
 	bool AST::delete_value_function(FunctionHandle hdl, error_code& ec)

@@ -8,7 +8,7 @@
 namespace fcl
 {
 
-class AddFunction : public IFunction
+class MultiplyFunction : public IFunction
 {
 	ReturnVector call(std::vector<nonType*> args) override
 	{
@@ -16,7 +16,7 @@ class AddFunction : public IFunction
 		const int& lhs = get_argument<int>(args, 0);
 		const int& rhs = get_argument<int>(args, 1);
 
-		int* result = new int(lhs + rhs);
+		int* result = new int(lhs * rhs);
 
 		return make_return_vector(result);
 	}
@@ -30,7 +30,7 @@ class AddFunction : public IFunction
 	}
 	std::string name() override
 	{
-		return "int_add";
+		return "int_multiply";
 	}
 };
 

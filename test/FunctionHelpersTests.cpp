@@ -2,7 +2,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <FunctionHelpers.hpp>
+#include <Functions/FunctionHelpers.hpp>
 
 namespace fcl
 {

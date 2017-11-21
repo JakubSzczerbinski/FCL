@@ -4,10 +4,20 @@
 #include <vector>
 #include <iostream>
 
-#include <IFunction.hpp>
+#include "IFunction.hpp"
 
 namespace fcl
 {
+
+inline ArgVector to_arg_vector(const ReturnVector& rets)
+{
+	ArgVector args;
+	for (auto&& ret : rets)
+	{
+		args.push_back(ret.get());
+	}
+	return args;
+}
 
 template <typename T>
 nonType* make_arg(T* arg)
@@ -32,6 +42,12 @@ const T& get_return(const ReturnVector& args, size_t index)
 {
 	assert(args.size() > index);
 	return *reinterpret_cast<T*>(args[index].get());
+}
+
+template <typename T>
+const T& get_return(const Return& ret)
+{
+	return *reinterpret_cast<T*>(ret.get());
 }
 
 
@@ -70,7 +86,7 @@ TypeVector make_type_vector()
 }
 
 template <typename T>
-class ValueFunction : IFunction
+class ValueFunction : public IFunction
 {
 public:
 	ValueFunction(T&& t) : t_(std::move(t)) {}
@@ -98,7 +114,7 @@ private:
 template <typename T>
 std::unique_ptr<IFunction> make_value_function(T&& t)
 {
-	return ValueFunction<T>(t);
+	return std::unique_ptr<IFunction>(new ValueFunction<T>(std::move(t)));
 }
 
 template<typename Iterator, typename ... Ts>

@@ -30,6 +30,21 @@
   #define error_log(...) log()
 #endif
 
+inline std::string to_string(const std::string& s)
+{
+  return s;
+}
+
+inline std::string to_string(const char* s)
+{
+  return s;
+}
+
+template<typename T>
+inline std::string to_string(const T& t)
+{
+  return std::to_string(t);
+}
 
 class Logger {
  public:
@@ -56,14 +71,14 @@ class Logger {
   template<typename M, typename ... Ms>
   Logger& printLogMessage(const M& msg, const Ms& ... messages)
   {
-    fprintf(stderr, "%s ", std::to_string(msg));
+    fprintf(stderr, "%s ", to_string(msg).c_str());
     printLogMessage(messages ...);
     return *this;
   }
   template <typename M>
   Logger& printLogMessage(const M& msg)
   {
-    fprintf(stderr, "%s ", std::to_string(msg));
+    fprintf(stderr, "%s ", to_string(msg).c_str());
     return *this;
   }
   std::vector<std::string> origin_;

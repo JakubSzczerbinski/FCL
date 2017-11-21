@@ -5,17 +5,19 @@
 
 #include <boost/type_index.hpp>
 
-#include <Constants.hpp>
+#include <Common/Constants.hpp>
 
 namespace fcl
 {
 
-using ReturnVector = std::vector<std::unique_ptr<nonType, std::function<void(nonType*)>>>;
+using Return = std::unique_ptr<nonType, std::function<void(nonType*)>>;
+using ReturnVector = std::vector<Return>;
+using ArgVector = std::vector<nonType*>;
 
 class IFunction
 {
 public:
-	virtual ReturnVector call(std::vector<nonType*>) = 0;
+	virtual ReturnVector call(ArgVector) = 0;
 	virtual TypeVector inputArgs() = 0;
 	virtual TypeVector outputArgs() = 0;
 	virtual std::string name() = 0;

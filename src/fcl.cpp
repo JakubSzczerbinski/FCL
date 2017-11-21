@@ -1,6 +1,6 @@
 
 #include <fcl.hpp>
-#include <AST.hpp>
+#include <AST/AST.hpp>
 
 
 namespace fcl
@@ -8,7 +8,7 @@ namespace fcl
 
     AST& ast()
     {
-        static AST ast({});
+        static AST ast{};
         return ast;
     }
 
