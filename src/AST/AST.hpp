@@ -75,6 +75,7 @@ public:
     FunctionHandle get_node_function(NodeHandle hdl, error_code& ec) const;
 
     NodeHandle create_node(FunctionHandle hdl, error_code& ec);
+    NodeHandle create_node(FunctionHandle hdl, std::string name, error_code& ec);
 
     bool delete_node(NodeHandle hdl, error_code& ec);
 
@@ -113,6 +114,7 @@ public:
     }
 
 private:
+    AST* self;
 
     template<typename T>
     void add_type()
@@ -144,6 +146,7 @@ private:
 
     struct Function
     {
+    public:   
         FunctionType type;
         std::unique_ptr<IFunction> function_;
     };
@@ -192,5 +195,6 @@ private:
     std::map<TypeHandle, boost::typeindex::type_index> typeMap;
     std::map<boost::typeindex::type_index, TypeHandle> reverseTypeMap;
 };
+
 
 } // namespace fcl

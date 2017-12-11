@@ -188,6 +188,12 @@ namespace fcl
 
     NodeHandle AST::create_node(FunctionHandle hdl, error_code& ec)
     {
+        return create_node(hdl, hdl, ec);
+    }
+
+
+    NodeHandle AST::create_node(FunctionHandle hdl, std::string node_name, error_code& ec)
+    {
     	auto it = functionMap.find(hdl);
 
     	if(it == functionMap.end())
@@ -204,7 +210,7 @@ namespace fcl
         auto argNumber = function->inputArgs().size();
         auto retNumber = function->outputArgs().size();
 
-    	nodeMap.insert(std::pair<NodeHandle, Node>(nhdl, Node(nhdl, hdl, argNumber, retNumber)));
+    	nodeMap.insert(std::pair<NodeHandle, Node>(nhdl, Node(node_name, hdl, argNumber, retNumber)));
 
     	return nhdl;
     }

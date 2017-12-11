@@ -53,4 +53,15 @@ TEST(LexerTests, shouldParse)
 	ASSERT_EQ(result, expected);
 }
 
+TEST(LexerTests, shouldParseString)
+{
+	std::vector<Token> expected = 
+	{
+		{Tokens::STRING, "123"},
+		{Tokens::STRING, "dsadasd"}
+	};
+	std::vector<Token> result = tokenize("\'123\'   \'dsadasd\'");
+	ASSERT_EQ(result, expected);
+}
+
 }
