@@ -62,7 +62,21 @@ private:
 			return {};
 		}
 
+		auto function_hdl = ast_.get_node_function(hdl, ec);
+		if (ec)
+		{
+			logger_.error_log("Exiting due to error while getting node's function for node", hdl);
+			return {};
+		}
+		auto function = ast_.get_function_from_handle(function_hdl, ec);
+		if (ec)
+		{
+			logger_.error_log("Exiting due to error while getting function callable for function", function_hdl);
+			return {};
+		}
+
 		ReturnVector args;
+		args.resize(function->inputArgs().size());
 		for (auto&& link : links)
 		{
 			auto node_hdl = ast_.get_argument_node(link, ec);
@@ -86,21 +100,8 @@ private:
 				return {};
 			}
 
-			assert(args.size() >= node_index);
-			args.push_back(std::move(rets[node_index]));
-		}
-
-		auto function_hdl = ast_.get_node_function(hdl, ec);
-		if (ec)
-		{
-			logger_.error_log("Exiting due to error while getting node's function for node", hdl);
-			return {};
-		}
-		auto function = ast_.get_function_from_handle(function_hdl, ec);
-		if (ec)
-		{
-			logger_.error_log("Exiting due to error while getting function callable for function", function_hdl);
-			return {};
+			auto arg_index = ast_.get_return_index(link, ec);
+			args[arg_index] = std::move(rets[node_index]);
 		}
 
 		return function->call(to_arg_vector(args));
