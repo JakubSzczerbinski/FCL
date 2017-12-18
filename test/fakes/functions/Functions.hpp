@@ -16,20 +16,20 @@
 namespace fcl
 {
 
-using Funcs = std::vector<std::unique_ptr<IFunction>>;
+using Funcs = std::vector<std::shared_ptr<IFunction>>;
 
-Funcs functions()
+inline Funcs functions()
 {
-	std::vector<std::unique_ptr<IFunction>> funcs{};
-	funcs.emplace_back(std::make_unique<AddFunction>());
-	funcs.emplace_back(std::make_unique<SubtractFunction>());
-	funcs.emplace_back(std::make_unique<MultiplyFunction>());
-	funcs.emplace_back(std::make_unique<DivideFunction>());
-	funcs.emplace_back(std::make_unique<NWDandNWWFunction>());
-	funcs.emplace_back(std::make_unique<IntToStringFunction>());
-	funcs.emplace_back(std::make_unique<ConcatFunction>());
-	funcs.emplace_back(std::make_unique<UppercaseFunction>());
-	funcs.emplace_back(std::make_unique<LowercaseFunction>());
+	std::vector<std::shared_ptr<IFunction>> funcs{};
+	funcs.emplace_back(std::make_shared<AddFunction>());
+	funcs.emplace_back(std::make_shared<SubtractFunction>());
+	funcs.emplace_back(std::make_shared<MultiplyFunction>());
+	funcs.emplace_back(std::make_shared<DivideFunction>());
+	funcs.emplace_back(std::make_shared<NWDandNWWFunction>());
+	funcs.emplace_back(std::make_shared<IntToStringFunction>());
+	funcs.emplace_back(std::make_shared<ConcatFunction>());
+	funcs.emplace_back(std::make_shared<UppercaseFunction>());
+	funcs.emplace_back(std::make_shared<LowercaseFunction>());
 	return funcs;
 }
 	

@@ -24,4 +24,6 @@ public:
 	virtual ~IFunction() = default;
 };
 
+using Functions = std::vector<std::shared_ptr<IFunction>>;
+
 } // namespace fcl

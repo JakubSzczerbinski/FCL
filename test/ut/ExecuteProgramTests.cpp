@@ -10,6 +10,7 @@
 #include <Evaluator/Evaluator.hpp>
 
 #include <fakes/functions/Functions.hpp>
+#include <fakes/serializers/Serializers.hpp>
 
 
 namespace fcl
@@ -21,20 +22,14 @@ T run(std::string program_text, Funcs&& functions, std::string nodeName, int out
 	auto program = parse(program_text);
 	assert(program.size() != 0);
 
-	AST ast(std::move(functions));
-	ProgramLoader loader(ast);
-	loader.load_program(program);
-
-	auto nodes = ast.get_nodes();
+	Nodes nodes = loadNodes(program, functions, serializers());
 
 	auto it = std::find_if(nodes.begin(), nodes.end(),
-		[&](auto&& node_hdl){ error_code ec; return ast.get_node_pretty_name(node_hdl, ec) == nodeName;});
+		[&](auto node){ return node->name == nodeName;});
 	assert(it != nodes.end());
 
-	auto eval = Evaluator(ast);
-	error_code ec = error_code::success;
-	auto result = eval.evaluate<T>(*it, output, ec);
-	assert(ec == error_code::success);
+	auto node = *it;
+	auto result = evaluate<T>(node->sourceEndpoint(output));
 	return get_return<T>(result);
 }
 

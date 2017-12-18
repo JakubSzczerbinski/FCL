@@ -1,113 +1,46 @@
 
 #pragma once
 
-#include <AST/AST.hpp>
-#include <Common/Logger.hpp>
-#include <fcl.hpp>
-#include <cassert>
+#include <AST/Node.hpp>
 #include <Functions/FunctionHelpers.hpp>
 
 namespace fcl
 {
 
-class Evaluator
+inline ReturnVector get_value(Node* node)
 {
-public:
-	Evaluator(AST& ast) 
-		: ast_(ast), logger_("fcl::Evaluator")
-	{}
-	template <typename T>
-	Return evaluate(NodeHandle hdl, int index, error_code& ec)
+	ReturnVector args;
+	args.resize(node->endpoints.size());
+
+	for (size_t i = 0; i < node->endpoints.size(); i++)
 	{
-		auto function_hdl = ast_.get_node_function(hdl, ec);
-		if (ec)
-		{
-			logger_.error_log("Exiting due to error while getting node's function for node", hdl);
-			return nullptr;
-		}
+		auto endpoint = node->endpoints[i];
+		if (endpoint == null_endpoint)
+			throw std::runtime_error("Unable to calculate node, endpoint " + std::to_string(i) + " not connected");
 
-		auto type_hdls = ast_.get_return_types(function_hdl, ec);
-		if (index >= type_hdls.size())
-		{
-			logger_.error_log("Index of evaulated return out of bounds.",
-				"index:", std::to_string(index),
-				"function:", function_hdl);
-			ec = error_code::invalid_index;
-			return nullptr;
-		}
+		auto sourceNode = endpoint.node();
+		auto endpointIndex = endpoint.index();
 
-		auto type_hdl = type_hdls[index];
-		if (!ast_.has_type<T>(type_hdl, ec))
-		{
-			logger_.error_log("Types dont match");
-			return nullptr;
-		}
-
-		ReturnVector rets = get_value(hdl, ec);
-		if (ec)
-		{
-			logger_.error_log("Failed to evaluate node", hdl);
-			return nullptr;
-		}
-		assert(index < rets.size());
-		return std::move(rets[index]);
+		auto sourceNodeReturns = get_value(sourceNode);
+		args[i] = std::move(sourceNodeReturns[endpointIndex]);
 	}
-private:
-	ReturnVector get_value(NodeHandle hdl, error_code& ec)
-	{
-		std::vector<LinkHandle> links = ast_.get_arg_links(hdl, ec);
-		if (ec)
-		{
-			logger_.error_log("Exiting due to error while getting links for", hdl);
-			return {};
-		}
 
-		auto function_hdl = ast_.get_node_function(hdl, ec);
-		if (ec)
-		{
-			logger_.error_log("Exiting due to error while getting node's function for node", hdl);
-			return {};
-		}
-		auto function = ast_.get_function_from_handle(function_hdl, ec);
-		if (ec)
-		{
-			logger_.error_log("Exiting due to error while getting function callable for function", function_hdl);
-			return {};
-		}
+	return node->function->call(to_arg_vector(args));
+}
 
-		ReturnVector args;
-		args.resize(function->inputArgs().size());
-		for (auto&& link : links)
-		{
-			auto node_hdl = ast_.get_argument_node(link, ec);
-			if (ec)
-			{
-				logger_.error_log("Exiting due to error while getting argument node for link", link);
-				return {};
-			}
+template<typename T>
+inline Return evaluate(const SourceEndpoint& source)
+{
+	auto node = source.node();
+	auto index = source.index();
 
-			auto node_index = ast_.get_argument_index(link, ec);
-			if (ec)
-			{
-				logger_.error_log("Exiting due to error while getting argument index for link", link);
-				return {};
-			}
+	auto returnTypes = node->function->outputArgs();
+	auto expectedType = bti::type_id<T>();
+	if (returnTypes[index] != expectedType)
+		throw std::runtime_error("Unable to evaluate endpoint as " + expectedType.pretty_name());
 
-			ReturnVector rets = get_value(node_hdl, ec);
-			if (ec)
-			{
-				logger_.error_log("Exiting due to error while evaluating node", node_hdl);
-				return {};
-			}
-
-			auto arg_index = ast_.get_return_index(link, ec);
-			args[arg_index] = std::move(rets[node_index]);
-		}
-
-		return function->call(to_arg_vector(args));
-	}
-	AST& ast_;
-	Logger logger_;
-};
+	ReturnVector returns = get_value(node);	
+	return std::move(returns[index]);
+}
 
 };

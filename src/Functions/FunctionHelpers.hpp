@@ -38,6 +38,12 @@ const T& get_argument(const std::vector<nonType*>& args, size_t index)
 }
 
 template <typename T>
+const T& get_argument(nonType* arg)
+{
+	return *reinterpret_cast<T*>(arg);
+}
+
+template <typename T>
 const T& get_return(const ReturnVector& args, size_t index)
 {
 	assert(args.size() > index);
@@ -112,9 +118,9 @@ private:
 };
 
 template <typename T>
-std::unique_ptr<IFunction> make_value_function(T&& t)
+std::shared_ptr<IFunction> make_value_function(T t)
 {
-	return std::unique_ptr<IFunction>(new ValueFunction<T>(std::move(t)));
+	return std::shared_ptr<IFunction>(new ValueFunction<T>(std::forward<T>(t)));
 }
 
 template<typename Iterator, typename ... Ts>
