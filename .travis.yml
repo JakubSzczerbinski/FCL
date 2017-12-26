@@ -32,4 +32,4 @@ install:
   - if [ "$CXX" == "g++" ]; then export CXX="g++-4.9"; fi
 
 script: 
-  - make ut-run VERBOSE=1
+  - make run_tests VERBOSE=1
