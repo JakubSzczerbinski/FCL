@@ -7,6 +7,7 @@
 
 #include <Functions/IFunction.hpp>
 #include <Functions/FunctionHelpers.hpp>
+#include <Functions/ValueFunction.hpp>
 
 namespace fcl
 {

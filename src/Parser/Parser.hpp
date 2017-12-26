@@ -36,7 +36,6 @@ struct Definition
 	std::string initialization_string;
 };
 
-
 using Statement = boost::variant<Declaration, Definition>;
 using Program = std::vector<Statement>;
 

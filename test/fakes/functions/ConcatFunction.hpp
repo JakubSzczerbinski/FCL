@@ -17,11 +17,11 @@ class ConcatFunction : public IFunction
 		const std::string& arg2 = get_argument<std::string>(args, 1);
 		return make_return_vector(new std::string(arg1 + arg2));
 	}
-	TypeVector inputArgs() override
+	TypeVector argTypes() override
 	{
 		return make_type_vector<std::string, std::string>();
 	}
-	TypeVector outputArgs() override
+	TypeVector returnTypes() override
 	{
 		return make_type_vector<std::string>();
 	}

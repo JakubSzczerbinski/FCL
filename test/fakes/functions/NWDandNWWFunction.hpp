@@ -30,11 +30,11 @@ class NWDandNWWFunction : public IFunction
 
 		return make_return_vector(new int(b), new int((arg1/b) * arg2));
 	}
-	TypeVector inputArgs() override
+	TypeVector argTypes() override
 	{
 		return make_type_vector<int, int>();
 	}
-	TypeVector outputArgs() override
+	TypeVector returnTypes() override
 	{
 		return make_type_vector<int, int>();
 	}

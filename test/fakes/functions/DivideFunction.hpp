@@ -21,11 +21,11 @@ class DivideFunction : public IFunction
 
 		return make_return_vector(quotient, remainder);
 	}
-	TypeVector inputArgs() override
+	TypeVector argTypes() override
 	{
 		return make_type_vector<int, int>();
 	}
-	TypeVector outputArgs() override
+	TypeVector returnTypes() override
 	{
 		return make_type_vector<int, int>();
 	}

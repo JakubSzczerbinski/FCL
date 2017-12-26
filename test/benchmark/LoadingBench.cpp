@@ -1,7 +1,7 @@
 
 #include <benchmark/benchmark.h>
 
-#include <AST/LoadProgram.hpp>
+#include <Nodes/LoadNodes.hpp>
 #include <Functions/FunctionHelpers.hpp>
 
 #include <Parser/Parser.hpp>

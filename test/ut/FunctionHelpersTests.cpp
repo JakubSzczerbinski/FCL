@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include <Functions/FunctionHelpers.hpp>
+#include <Functions/ValueFunction.hpp>
 
 namespace fcl
 {
@@ -85,7 +86,7 @@ TEST(FunctionHelpersTests, createFunctionFromLambdaAndExecute)
 		"testFun");
 
 	ValueFunction<int> val123(123);
-	auto retVector = func->call({make_arg(val123.call({}), 0)});
+	auto retVector = func->call({to_arg(val123.call({}), 0)});
 	auto ret = get_return<int>(retVector, 0);
 	ASSERT_EQ(1, ret);
 }
@@ -100,7 +101,7 @@ TEST(FunctionHelpersTests, createFunctionFromLambdaAndForwardTheArg)
 		"testFun");
 
 	ValueFunction<int> val123(123);
-	auto retVector = func->call({make_arg(val123.call({}), 0)});
+	auto retVector = func->call({to_arg(val123.call({}), 0)});
 	auto ret = get_return<int>(retVector, 0);
 	ASSERT_EQ(123, ret);
 }
@@ -115,7 +116,7 @@ TEST(FunctionHelpersTests, createFunctionFromLambdaAndForwardThePointerArg)
 		"testFun");
 
 	ValueFunction<int> val123(123);
-	auto retVector = func->call({make_arg(val123.call({}), 0)});
+	auto retVector = func->call({to_arg(val123.call({}), 0)});
 	auto ret = get_return<int>(retVector, 0);
 	ASSERT_EQ(123, ret);
 }

@@ -16,9 +16,7 @@
 namespace fcl
 {
 
-using Funcs = std::vector<std::shared_ptr<IFunction>>;
-
-inline Funcs functions()
+inline Functions functions()
 {
 	std::vector<std::shared_ptr<IFunction>> funcs{};
 	funcs.emplace_back(std::make_shared<AddFunction>());

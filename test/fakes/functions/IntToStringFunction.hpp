@@ -16,11 +16,11 @@ class IntToStringFunction : public IFunction
 		const int& arg = get_argument<int>(args, 0);
 		return make_return_vector(new std::string(std::to_string(arg)));
 	}
-	TypeVector inputArgs() override
+	TypeVector argTypes() override
 	{
 		return make_type_vector<int>();
 	}
-	TypeVector outputArgs() override
+	TypeVector returnTypes() override
 	{
 		return make_type_vector<std::string>();
 	}

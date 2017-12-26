@@ -18,7 +18,6 @@ struct lambda_visitor< ReturnType, Lambda1 , Lambdas...>
     {}
 };
 
-
 template <typename ReturnType, typename Lambda1>
 struct lambda_visitor<ReturnType, Lambda1> 
   : public boost::static_visitor<ReturnType>, public Lambda1 {
@@ -28,7 +27,6 @@ struct lambda_visitor<ReturnType, Lambda1>
       : boost::static_visitor<ReturnType>(), Lambda1(std::forward<Lambda1>(l1))
     {}
 };
-
 
 template <typename ReturnType>
 struct lambda_visitor<ReturnType> 

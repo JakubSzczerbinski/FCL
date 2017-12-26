@@ -2,7 +2,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <AST/LoadProgram.hpp>
+#include <Nodes/LoadNodes.hpp>
 #include <Functions/FunctionHelpers.hpp>
 
 #include <fakes/functions/AddFunction.hpp>

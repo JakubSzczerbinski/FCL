@@ -1,4 +1,3 @@
-#pragma once
 
 #include <map>
 #include <stdexcept>
@@ -9,13 +8,14 @@
 #include <Serialization/ISerializer.hpp>
 #include <Functions/FunctionHelpers.hpp>
 #include <Utils/LambdaVisitor.hpp>
-#include "Node.hpp"
 
+#include "Node.hpp"
+#include "LoadNodes.hpp"
 
 namespace fcl
 {
 
-inline Nodes loadNodes(
+Nodes loadNodes(
 	const Program& program,
 	const Functions& functions,
 	const Serializers& serializers)
@@ -36,7 +36,7 @@ inline Nodes loadNodes(
 		auto serializer = *it;
 		auto function = serializer->deserialize(definition.initialization_string);
 
-		nodes.push_back(new Node(function, definition.node_name));
+		nodes.push_back(std::make_unique<Node>(function, definition.node_name));
 		return 0;
 	},
 	[&](const Declaration& declaration) -> int
@@ -51,26 +51,26 @@ inline Nodes loadNodes(
 		if (it == functions.cend())
 			throw std::runtime_error("No function named " + function_name);
 
-		auto node = new Node(*it, declaration.node_name);
+		auto node = std::make_unique<Node>(*it, declaration.node_name);
 		unsigned i = 0;
 
 		for (auto&& link : declaration.constructor.links)
 		{
 			auto sourceNodeName = link.node_name;
 			auto it = std::find_if(nodes.cbegin(), nodes.cend(), 
-				[&](Node* node)
+				[&](const std::unique_ptr<Node>& n) -> bool
 				{
-					return node->name == sourceNodeName;
+					return n->name == sourceNodeName;
 				});
 
 			if (it == nodes.cend())
 				throw std::runtime_error("No node named " + sourceNodeName);
 			
-			auto sourceNode = *it;
+			auto& sourceNode = *it;
 			node->setTargetEndpoint(i++, sourceNode->sourceEndpoint(link.index));
 		}
 
-		nodes.push_back(node);
+		nodes.push_back(std::move(node));
 		return 0;
 	});
 
@@ -79,6 +79,15 @@ inline Nodes loadNodes(
 		boost::apply_visitor(visitor, statement);
 	}
 	return nodes;
+}
+
+Nodes readNodes(
+	const std::string& program_text,
+	const Functions& functions,
+	const Serializers& serializers)
+{
+	auto program = parse(program_text);
+	return loadNodes(program, functions, serializers);
 }
 
 }

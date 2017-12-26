@@ -2,7 +2,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <AST/LoadProgram.hpp>
+#include <Nodes/LoadNodes.hpp>
 #include <Functions/FunctionHelpers.hpp>
 
 #include <Parser/Parser.hpp>
@@ -17,7 +17,7 @@ namespace fcl
 {
 
 template <typename T>
-T run(std::string program_text, Funcs&& functions, std::string nodeName, int output)
+T run(std::string program_text, Functions&& functions, std::string nodeName, int output)
 {
 	auto program = parse(program_text);
 	assert(program.size() != 0);
@@ -25,10 +25,10 @@ T run(std::string program_text, Funcs&& functions, std::string nodeName, int out
 	Nodes nodes = loadNodes(program, functions, serializers());
 
 	auto it = std::find_if(nodes.begin(), nodes.end(),
-		[&](auto node){ return node->name == nodeName;});
+		[&](auto& node){ return node->name == nodeName;});
 	assert(it != nodes.end());
 
-	auto node = *it;
+	auto& node = *it;
 	auto result = evaluate<T>(node->sourceEndpoint(output));
 	return get_return<T>(result);
 }

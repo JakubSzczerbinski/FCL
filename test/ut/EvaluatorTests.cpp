@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include <Functions/ValueFunction.hpp>
 #include <Evaluator/Evaluator.hpp>
-#include <AST/Node.hpp>
+#include <Nodes/Node.hpp>
 
 #include <fakes/functions/AddFunction.hpp>
 #include <fakes/functions/MultiplyFunction.hpp>
@@ -13,7 +14,8 @@ namespace fcl
 
 TEST(EvaluatorTests, shouldEvaluateValueFunction)
 {
-	Nodes nodes {new Node(make_value_function(10), "returns_10")};
+	Nodes nodes;
+	nodes.push_back(std::make_unique<Node>(make_value_function<int>(10), "returns_10"));
 	auto result = evaluate<int>(nodes[0]->sourceEndpoint(0));
 	ASSERT_EQ(10, get_return<int>(result));
 }
@@ -21,8 +23,8 @@ TEST(EvaluatorTests, shouldEvaluateValueFunction)
 
 TEST(EvaluatorTests, shouldAddTwoNumbers)
 {
-	auto value_node = new Node(make_value_function<int>(14), "returns_14");
-	auto add_node = new Node(std::make_shared<AddFunction>(), "add");
+	auto value_node = std::make_unique<Node>(make_value_function<int>(14), "returns_14");
+	auto add_node = std::make_unique<Node>(std::make_shared<AddFunction>(), "add");
 	add_node->setTargetEndpoint(0, value_node->sourceEndpoint(0));
 	add_node->setTargetEndpoint(1, value_node->sourceEndpoint(0));
 
@@ -32,13 +34,13 @@ TEST(EvaluatorTests, shouldAddTwoNumbers)
 
 TEST(EvaluatorTests, shouldAddFourNumbers)
 {
-	auto value_node = new Node(make_value_function<int>(14), "returns_14");
+	auto value_node = std::make_unique<Node>(make_value_function<int>(14), "returns_14");
 
-	auto add_node1 = new Node(std::make_shared<AddFunction>(), "add1");
+	auto add_node1 = std::make_unique<Node>(std::make_shared<AddFunction>(), "add1");
 	add_node1->setTargetEndpoint(0, value_node->sourceEndpoint(0));
 	add_node1->setTargetEndpoint(1, value_node->sourceEndpoint(0));
 
-	auto add_node2 = new Node(std::make_shared<AddFunction>(), "add2");
+	auto add_node2 = std::make_unique<Node>(std::make_shared<AddFunction>(), "add2");
 	add_node2->setTargetEndpoint(0, add_node1->sourceEndpoint(0));
 	add_node2->setTargetEndpoint(1, add_node1->sourceEndpoint(0));
 
@@ -51,17 +53,17 @@ TEST(EvaluatorTests, shouldAddFourNumbers)
 
 TEST(EvaluatorTests, shouldDoArithmetic)
 {
-	auto value_node = new Node(make_value_function<int>(14), "returns_14");
+	auto value_node = std::make_unique<Node>(make_value_function<int>(14), "returns_14");
 
-	auto add_node = new Node(std::make_shared<AddFunction>(), "add");
+	auto add_node = std::make_unique<Node>(std::make_shared<AddFunction>(), "add");
 	add_node->setTargetEndpoint(0, value_node->sourceEndpoint(0));
 	add_node->setTargetEndpoint(1, value_node->sourceEndpoint(0));
 
-	auto multiply_node1 = new Node(std::make_shared<MultiplyFunction>(), "multiply1");
+	auto multiply_node1 = std::make_unique<Node>(std::make_shared<MultiplyFunction>(), "multiply1");
 	multiply_node1->setTargetEndpoint(0, add_node->sourceEndpoint(0));
 	multiply_node1->setTargetEndpoint(1, value_node->sourceEndpoint(0));
 
-	auto multiply_node2 = new Node(std::make_shared<MultiplyFunction>(), "multiply2");
+	auto multiply_node2 = std::make_unique<Node>(std::make_shared<MultiplyFunction>(), "multiply2");
 	multiply_node2->setTargetEndpoint(0, multiply_node1->sourceEndpoint(0));
 	multiply_node2->setTargetEndpoint(1, add_node->sourceEndpoint(0));
 

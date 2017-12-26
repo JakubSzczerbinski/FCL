@@ -23,11 +23,11 @@ class UppercaseFunction : public IFunction
 		} 
 		return make_return_vector(new std::string(arg));
 	}
-	TypeVector inputArgs() override
+	TypeVector argTypes() override
 	{
 		return make_type_vector<std::string>();
 	}
-	TypeVector outputArgs() override
+	TypeVector returnTypes() override
 	{
 		return make_type_vector<std::string>();
 	}
