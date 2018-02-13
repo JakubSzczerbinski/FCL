@@ -1,5 +1,5 @@
+
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 
 #include <Functions/ValueFunction.hpp>
 #include <Evaluator/Evaluator.hpp>

@@ -1,9 +1,7 @@
 
 #include <ostream>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
 #include <Parser/Lexer.hpp>
 
 
