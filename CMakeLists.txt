@@ -2,7 +2,7 @@
 cmake_minimum_required (VERSION 2.8.0)
 project (FCL)
 
-execute_process(COMMAND conan install ${CMAKE_SOURCE_DIR} --build missing)
+execute_process(COMMAND conan install ${CMAKE_SOURCE_DIR} --build missing -s compiler.libcxx=libstdc++11)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
