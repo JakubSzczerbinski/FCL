@@ -2,7 +2,7 @@
 cmake_minimum_required (VERSION 2.8.0)
 project (FCL)
 
-execute_process(COMMAND conan install ${CMAKE_SOURCE_DIR} --build gtest OUTPUT_QUIET)
+execute_process(COMMAND conan install ${CMAKE_SOURCE_DIR} --build missing)
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
