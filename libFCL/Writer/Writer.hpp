@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Nodes/Node.hpp>
-#include <Serialization/ISerializer.hpp>
+#include "../Nodes/Node.hpp"
+#include "../Serialization/ISerializer.hpp"
 
 namespace fcl
 {

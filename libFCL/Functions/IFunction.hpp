@@ -5,7 +5,7 @@
 
 #include <boost/type_index.hpp>
 
-#include <Common/Constants.hpp>
+#include "../Common/Constants.hpp"
 
 namespace fcl
 {

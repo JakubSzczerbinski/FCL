@@ -123,6 +123,34 @@ boost::optional<Definition> parse_definition(std::vector<Token>::iterator& begin
 	return result;
 }
 
+boost::optional<ReturnList> parse_return(std::vector<Token>::iterator& begin, std::vector<Token>::iterator end)
+{
+	auto it = begin;
+	ReturnList result;
+	if (it == end || *it != Token{Tokens::ID, "return"})
+		return boost::none;
+	it++;
+
+	while (it != end)
+	{
+		auto link = parse_link(it, end);
+		if (not link)
+			return boost::none;
+
+		result.returns.push_back(*link);
+
+		if (it == end || *it != Tokens::COMMA_OP)
+		{
+			begin = it;
+			return result;
+		}
+		it++;
+	}
+
+	begin = it;
+	return result;
+}
+
 Program parse(const std::string& text)
 {
 	auto tokens = tokenize(text);
@@ -145,9 +173,15 @@ Program parse(const std::string& text)
 			continue;
 		}
 
-		return {};
-	}
+		auto maybe_return = parse_return(it, tokens.end());
+		if (maybe_return)
+		{
+			result.push_back(maybe_return.get());
+			continue;
+		}
 
+		throw std::runtime_error("Failed to parse.");
+	}
 
 	return result;
 }

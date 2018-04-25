@@ -2,8 +2,8 @@
 
 #include <cassert>
 
-#include <Functions/IFunction.hpp>
-#include <Functions/FunctionHelpers.hpp>
+#include <libFCL/Functions/IFunction.hpp>
+#include <libFCL/Functions/FunctionHelpers.hpp>
 
 namespace fcl
 {

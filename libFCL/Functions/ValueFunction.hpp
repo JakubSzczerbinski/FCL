@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include <cassert>
 
 #include "IFunction.hpp"
@@ -15,7 +17,7 @@ public:
 	ReturnVector call(std::vector<nonType*> args) override
 	{
 		if (args.size() != 0)
-			throw std::logic_error("Expecting 1 argument.");
+			throw std::logic_error("Expecting 0 arguments.");
 
 		return make_return_vector(new T(t_));
 	}

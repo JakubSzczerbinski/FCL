@@ -1,12 +1,12 @@
 
 #include <benchmark/benchmark.h>
 
-#include <Nodes/LoadNodes.hpp>
-#include <Functions/FunctionHelpers.hpp>
+#include <libFCL/Nodes/LoadNodes.hpp>
+#include <libFCL/Functions/FunctionHelpers.hpp>
 
-#include <Parser/Parser.hpp>
-#include <Parser/Lexer.hpp>
-#include <Evaluator/Evaluator.hpp>
+#include <libFCL/Parser/Parser.hpp>
+#include <libFCL/Parser/Lexer.hpp>
+#include <libFCL/Evaluator/Evaluator.hpp>
 
 #include <fakes/functions/Functions.hpp>
 

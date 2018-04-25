@@ -1,0 +1,132 @@
+              
+body 
+{
+  background: #3299BB;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+#gui
+{
+  display: grid;
+  grid-template-columns: 1fr 5fr;
+  grid-template-rows: 5fr 1fr;
+  grid-template-areas:  "sidebar canvas"
+                        "sidebar console";
+  grid-gap: 10px 10px;
+  margin: auto;
+  height: 98vh;
+  width: 98vw;
+}
+
+.gui_area
+{
+  background: #424242;
+  -moz-border-radius: 0.5em;
+  border-radius: 0.5em;
+}
+
+#canvas
+{
+  grid-area: canvas;
+  overflow: hidden;
+}
+
+#sidebar
+{
+  padding: 5px;
+  grid-area: sidebar;
+}
+
+#console
+{
+  grid-area: console;
+}
+
+canvas#connections
+{
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.node {
+  width: 200px;
+  background-color: #E9E9E9;
+  -moz-border-radius: 0.5em;
+  border-radius: 0.5em;
+  padding: 5px;
+}
+
+.return {
+  padding: 5px;
+  display: grid;
+  grid-template-columns: auto min-content;
+  grid-template-rows: 1fr;
+  grid-template-areas: "name endpoint";
+  grid-gap: 10px 10px;
+}
+
+.ret_name {
+  grid-area: name;
+  text-align: right;
+}
+
+.source_endpoint {
+  z-index: 2;
+  align-self: center;
+  grid-area: endpoint;
+  width: 14px;
+  height: 14px;
+  -webkit-border-radius: 25px;
+  -moz-border-radius: 25px;
+  border-radius: 25px;
+  background: #FF9900;
+}
+
+.argument {
+  padding: 5px;
+  display: grid;
+  grid-template-columns: min-content auto;
+  grid-template-rows: 1fr;
+  grid-template-areas: "endpoint name";
+  grid-gap: 10px;
+}
+
+.target_endpoint {
+  z-index: 1;
+  align-self: center;
+  grid-area: endpoint;
+  width: 14px;
+  height: 14px;
+  -webkit-border-radius: 25px;
+  -moz-border-radius: 25px;
+  border-radius: 25px;
+  background: #BCBCBC;
+}
+
+.arg_name {
+  grid-area: name;
+  text-align: left;
+}
+
+.node_title
+{
+  background: #3299BB;
+  -moz-border-radius: 0.5em;
+  border-radius: 0.5em;
+  padding: 5px;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+ 
+li {
+  background-color: #E9E9E9;
+  -moz-border-radius: 0.5em;
+  border-radius: 0.5em;
+  margin: 5px 5px;
+  padding: 5px;
+}

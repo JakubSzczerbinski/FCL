@@ -5,9 +5,9 @@
 
 #include "ISerializer.hpp"
 
-#include <Functions/IFunction.hpp>
-#include <Functions/FunctionHelpers.hpp>
-#include <Functions/ValueFunction.hpp>
+#include "../Functions/IFunction.hpp"
+#include "../Functions/FunctionHelpers.hpp"
+#include "../Functions/ValueFunction.hpp"
 
 namespace fcl
 {

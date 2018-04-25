@@ -1,12 +1,12 @@
 
 #include <gtest/gtest.h>
 
-#include <Nodes/LoadNodes.hpp>
-#include <Functions/FunctionHelpers.hpp>
+#include <libFCL/Nodes/LoadNodes.hpp>
+#include <libFCL/Functions/FunctionHelpers.hpp>
 
-#include <Parser/Parser.hpp>
-#include <Parser/Lexer.hpp>
-#include <Evaluator/Evaluator.hpp>
+#include <libFCL/Parser/Parser.hpp>
+#include <libFCL/Parser/Lexer.hpp>
+#include <libFCL/Evaluator/Evaluator.hpp>
 
 #include <fakes/functions/Functions.hpp>
 #include <fakes/serializers/Serializers.hpp>
@@ -21,14 +21,14 @@ T run(std::string program_text, Functions&& functions, std::string nodeName, int
 	auto program = parse(program_text);
 	assert(program.size() != 0);
 
-	Nodes nodes = loadNodes(program, functions, serializers());
+	auto nodes = loadNodes(program, functions, serializers());
 
-	auto it = std::find_if(nodes.begin(), nodes.end(),
+	auto it = std::find_if(nodes.first.begin(), nodes.first.end(),
 		[&](auto& node){ return node->name == nodeName;});
-	assert(it != nodes.end());
+	assert(it != nodes.first.end());
 
 	auto& node = *it;
-	auto result = evaluate<T>(node->sourceEndpoint(output));
+	auto result = evaluate(node->sourceEndpoint(output));
 	return get_return<T>(result);
 }
 

@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <Functions/IFunction.hpp>
+#include "../Functions/IFunction.hpp"
 
 namespace fcl
 {
@@ -18,5 +18,5 @@ public:
 };
 
 using Serializers = std::vector<std::shared_ptr<ISerializer>>;
-	
+
 }

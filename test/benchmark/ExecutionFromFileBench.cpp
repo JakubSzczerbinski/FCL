@@ -1,12 +1,12 @@
 
 #include <benchmark/benchmark.h>
 
-#include <Nodes/LoadNodes.hpp>
-#include <Functions/FunctionHelpers.hpp>
+#include <libFCL/Nodes/LoadNodes.hpp>
+#include <libFCL/Functions/FunctionHelpers.hpp>
 
-#include <Parser/Parser.hpp>
-#include <Parser/Lexer.hpp>
-#include <Evaluator/Evaluator.hpp>
+#include <libFCL/Parser/Parser.hpp>
+#include <libFCL/Parser/Lexer.hpp>
+#include <libFCL/Evaluator/Evaluator.hpp>
 
 #include <fakes/functions/Functions.hpp>
 #include <fakes/serializers/Serializers.hpp>
@@ -48,11 +48,11 @@ R"program(
 
 	auto nodes = loadNodes(program, functions(), serializers());
 
-	auto it = std::find_if(nodes.begin(), nodes.end(),
+	auto it = std::find_if(nodes.first.begin(), nodes.first.end(),
 		[&](auto&& node){ return node->name == "resultLowercase";});
-	assert(it != nodes.end());
+	assert(it != nodes.first.end());
 
-	auto result = evaluate<std::string>((*it)->sourceEndpoint(0));
+	auto result = evaluate((*it)->sourceEndpoint(0));
     auto val = get_return<std::string>(result);
     assert(val == "hello math 2 + 3 = 5");
   }

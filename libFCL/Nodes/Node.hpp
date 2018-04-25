@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include <Functions/IFunction.hpp>
+#include "../Functions/IFunction.hpp"
 
 namespace fcl
 {
@@ -87,7 +87,13 @@ public:
 	const std::shared_ptr<IFunction> function;
 };
 
+struct ReturnNode
+{
+	SourceEndpoint sourceEndpoint;
+};
+
 using Nodes = std::vector<std::unique_ptr<Node>>;
+using ReturnNodes = std::vector<ReturnNode>;
 
 namespace detail
 {

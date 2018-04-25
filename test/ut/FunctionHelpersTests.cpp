@@ -1,8 +1,8 @@
 
 #include <gtest/gtest.h>
 
-#include <Functions/FunctionHelpers.hpp>
-#include <Functions/ValueFunction.hpp>
+#include <libFCL/Functions/FunctionHelpers.hpp>
+#include <libFCL/Functions/ValueFunction.hpp>
 
 namespace fcl
 {

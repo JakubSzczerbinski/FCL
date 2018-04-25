@@ -2,10 +2,11 @@
 
 #include <gtest/gtest.h>
 
-#include <Writer/Writer.hpp>
-#include <Parser/Parser.hpp>
-#include <Functions/FunctionHelpers.hpp>
-#include <Nodes/LoadNodes.hpp>
+#include <libFCL/Writer/Writer.hpp>
+#include <libFCL/Parser/Parser.hpp>
+#include <libFCL/Functions/FunctionHelpers.hpp>
+#include <libFCL/Functions/ValueFunction.hpp>
+#include <libFCL/Nodes/LoadNodes.hpp>
 
 #include <fakes/functions/AddFunction.hpp>
 #include <fakes/serializers/Serializers.hpp>
@@ -25,20 +26,20 @@ TEST(WriterTests, writeNodesAndLoadResultInSameNodes)
 	auto program = parse(contents);
 	auto nodes = loadNodes(program, {std::make_shared<AddFunction>()}, serializers());
 
-	auto it = std::find_if(nodes.begin(), nodes.end(), 
+	auto it = std::find_if(nodes.first.begin(), nodes.first.end(), 
 		[&](auto& node)
 		{
 			return node->name == "ten" && node->function->name() == "int";
 		});
 
-	ASSERT_NE(it, nodes.end());
+	ASSERT_NE(it, nodes.first.end());
 
-	it = std::find_if(nodes.begin(), nodes.end(), 
+	it = std::find_if(nodes.first.begin(), nodes.first.end(), 
 		[&](auto& node)
 		{
 			return node->name == "add" && node->function->name() == "int_add";
 		});
-	ASSERT_NE(it, nodes.end());
+	ASSERT_NE(it, nodes.first.end());
 }
 
 }

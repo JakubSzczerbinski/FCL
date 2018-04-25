@@ -2,7 +2,7 @@
 #include <ostream>
 
 #include <gtest/gtest.h>
-#include <Parser/Lexer.hpp>
+#include <libFCL/Parser/Lexer.hpp>
 
 
 namespace fcl

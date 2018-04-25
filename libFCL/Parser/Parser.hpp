@@ -36,7 +36,12 @@ struct Definition
 	std::string initialization_string;
 };
 
-using Statement = boost::variant<Declaration, Definition>;
+struct ReturnList
+{
+	std::vector<Link> returns;
+};
+
+using Statement = boost::variant<Declaration, Definition, ReturnList>;
 using Program = std::vector<Statement>;
 
 Program parse(const std::string& text);

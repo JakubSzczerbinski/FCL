@@ -4,10 +4,10 @@
 
 #include <boost/optional.hpp>
 
-#include <Parser/Parser.hpp>
-#include <Serialization/ISerializer.hpp>
-#include <Functions/FunctionHelpers.hpp>
-#include <Utils/LambdaVisitor.hpp>
+#include "../Parser/Parser.hpp"
+#include "../Serialization/ISerializer.hpp"
+#include "../Functions/FunctionHelpers.hpp"
+#include "../Utils/LambdaVisitor.hpp"
 
 #include "Node.hpp"
 #include "LoadNodes.hpp"
@@ -15,12 +15,15 @@
 namespace fcl
 {
 
-Nodes loadNodes(
+std::pair<Nodes, ReturnNodes> loadNodes(
 	const Program& program,
 	const Functions& functions,
 	const Serializers& serializers)
 {
-	Nodes nodes;
+	std::pair<Nodes, ReturnNodes> result;
+	Nodes& nodes = result.first;
+	ReturnNodes& returnNodes = result.second;
+
 	auto visitor = make_lambda_visitor<int>(
 	[&](const Definition& definition) -> int
 	{
@@ -72,16 +75,36 @@ Nodes loadNodes(
 
 		nodes.push_back(std::move(node));
 		return 0;
+	},
+	[&](const ReturnList& list) -> int
+	{
+		for (auto&& el : list.returns)
+		{
+			auto it = std::find_if(nodes.cbegin(), nodes.cend(),
+				[&](const std::unique_ptr<Node>& n)
+				{
+					return n->name == el.node_name;
+				});
+
+			if (it == nodes.cend())
+				throw std::runtime_error("No node named " + el.node_name);
+
+			auto& node = *it;
+			ReturnNode retNode = {node->sourceEndpoint(el.index)};
+
+			returnNodes.push_back(retNode);
+		}
+		return 0;
 	});
 
 	for (auto&& statement : program)
 	{
 		boost::apply_visitor(visitor, statement);
 	}
-	return nodes;
+	return result;
 }
 
-Nodes readNodes(
+std::pair<Nodes, ReturnNodes> readNodes(
 	const std::string& program_text,
 	const Functions& functions,
 	const Serializers& serializers)
