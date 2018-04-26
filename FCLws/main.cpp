@@ -12,6 +12,8 @@
 #include <CLI/CLI.hpp>
 #include <libFCL/FCL.hpp>
 
+using server = websocketpp::server<websocketpp::config::asio>;
+
 struct IntSerializerImpl
 {
 	std::string toString(int i)
@@ -61,150 +63,178 @@ std::string get_mime(const std::string& path)
     return "text/plain";
 }
 
-using server = websocketpp::server<websocketpp::config::asio>;
+std::string create_hello_response(
+    const fcl::Serializers& serializers,
+    const fcl::Functions& functions)
+{
+    Json::Value response;
+
+    Json::Value json_serializers(Json::arrayValue);
+    for (auto&& serializer : serializers)
+    {
+        Json::Value json_serializer;
+        json_serializer["type"] = serializer->type().pretty_name();
+        json_serializers.append(json_serializer);
+    }
+
+    Json::Value json_functions(Json::arrayValue);
+    for (auto&& function : functions)
+    {
+        Json::Value json_function;
+        json_function["name"] = function->name();
+        Json::Value inputs;
+        for (auto&& type : function->argTypes())
+        {
+            Json::Value input;
+            input["type"] = type.pretty_name();
+            inputs.append(input);
+        }
+        Json::Value outputs;
+        for (auto&& type: function->returnTypes())
+        {
+            Json::Value output;
+            output["type"] = type.pretty_name();
+            outputs.append(output);
+        }
+        json_function["inputs"] = inputs;
+        json_function["outputs"] = outputs;
+        json_functions.append(json_function);
+    }
+    response["type"] = "hi";
+    response["content"]["serializers"] = json_serializers;
+    response["content"]["functions"] = json_functions;
+    Json::FastWriter fastWriter;
+    std::string response_data = fastWriter.write(response);
+    return response_data;
+}
+
+std::string create_evaluate_response(
+    const Json::Value& msg_root,
+    const fcl::Serializers& serializers,
+    const fcl::Functions& functions)
+{
+    std::string program_text = msg_root.get("program", "").asString();
+    Json::Value response;
+
+    try{
+
+        auto nodes = fcl::readNodes(program_text, functions, serializers);
+        Json::Value returns(Json::arrayValue);
+
+        for (auto& returnNode : nodes.second)
+        {
+            auto endpoint = returnNode.sourceEndpoint;
+            auto retType = endpoint.node()->function->returnTypes()[endpoint.index()];
+            auto ret = fcl::evaluate(endpoint);
+            auto it = std::find_if(serializers.begin(), serializers.end(),
+                [&](std::shared_ptr<fcl::ISerializer> serializer)
+                {
+                    return serializer->type().name() == retType.name();
+                });
+
+            if (it == serializers.end())
+                throw std::runtime_error("Unable to deserialize return");
+
+            auto serializer = *it;
+
+            Json::Value json_ret;
+            json_ret["node_name"] = endpoint.node()->name;
+            json_ret["node_index"] = endpoint.index();
+            json_ret["result"] = serializer->serialize(ret.get());
+            returns.append(json_ret);
+        }
+
+        response["content"] = returns;
+        response["type"] = "result";
+    } catch(...)
+    {
+        response["content"] = "Failed to evaluate";
+        response["type"] = "error";
+    }
+    Json::FastWriter fastWriter;
+    return fastWriter.write(response);
+}
+
+std::string create_invalid_response()
+{
+    Json::Value response;
+    response["type"] = "invalid";
+    return Json::FastWriter().write(response);
+}
+
+std::string create_response(
+    Json::Value msg_root,
+    const fcl::Serializers& serializers,
+    const fcl::Functions& functions)
+{
+    if (not msg_root.isObject())
+    {
+        std::cerr << "Received invalid message." << std::endl;
+        return create_invalid_response();
+    }
+
+    std::string type = msg_root.get("type", "invalid").asString();
+    if (type == "invalid")
+    {
+        std::cerr << "Received message without specified type." << std::endl;
+        return create_invalid_response();
+    }
+    
+    if (type == "hello")
+    {
+        return create_hello_response(serializers, functions);
+    }
+
+    if (type == "evaluate")
+    {
+        return create_evaluate_response(msg_root, serializers, functions);
+    }
+}
+
+Json::Value getMessagePayload(server::message_ptr msg)
+{
+    Json::Value root;
+    std::stringstream ss(msg->get_payload());
+    ss >> root;
+    return root;
+}
 
 int main(int argc, char** argv) {
     CLI::App app{"Function composition language interpreter"};
-	int port = 8000;
-	app.add_option(
-		"--parse, -p", port, 
-		"server port", true);
-	CLI11_PARSE(app, argc, argv);
+    int port = 8000;
+    app.add_option(
+        "--parse, -p", port, 
+        "server port", true);
+    CLI11_PARSE(app, argc, argv);
 
     fcl::Serializers serializers =
-	{
-		std::make_shared<IntSerializer>()
-	};
+    {
+        std::make_shared<IntSerializer>()
+    };
 
-	fcl::Functions functions = 
-	{
-		fcl::Input<int, int>::Output<int>::makeFunction(
-			[&](int lhs, int rhs)
-			{
-				return new int(lhs + rhs);
-			}, "int_add"),
-		fcl::Input<int, int>::Output<int>::makeFunction(
-			[&](int lhs, int rhs)
-			{
-				return new int(lhs - rhs);
-			}, "int_sub")
-	};
+    fcl::Functions functions = 
+    {
+        fcl::Input<int, int>::Output<int>::makeFunction(
+            [&](int lhs, int rhs)
+            {
+                return new int(lhs + rhs);
+            }, "int_add"),
+        fcl::Input<int, int>::Output<int>::makeFunction(
+            [&](int lhs, int rhs)
+            {
+                return new int(lhs - rhs);
+            }, "int_sub")
+    };
 
     server server_instance;
     server_instance.set_message_handler(
-        [&](websocketpp::connection_hdl hdl, server::message_ptr msg) {
+        [&](websocketpp::connection_hdl hdl, server::message_ptr msg) 
+        {
             server::connection_ptr con = server_instance.get_con_from_hdl(hdl);
-            std::cout << msg->get_payload() << std::endl;
+            Json::Value root = getMessagePayload(msg);
 
-            Json::Value root;
-            std::stringstream ss(msg->get_payload());
-            ss >> root;
-            assert(root.isObject());
-
-            std::string type = root.get("type", "invalid").asString();
-            if (type == "invalid")
-                return;
-            
-            if (type == "hello")
-            {
-                std::cerr << "Client connected. Sending available function, serializers, converters..." << std::endl;
-                Json::Value response;
-
-                Json::Value json_serializers(Json::arrayValue);
-                for (auto&& serializer : serializers)
-                {
-                    Json::Value json_serializer;
-                    json_serializer["type"] = serializer->type().pretty_name();
-                    json_serializers.append(json_serializer);
-                }
-
-                Json::Value json_functions(Json::arrayValue);
-                for (auto&& function : functions)
-                {
-                    Json::Value json_function;
-                    json_function["name"] = function->name();
-                    Json::Value inputs;
-                    for (auto&& type : function->argTypes())
-                    {
-                        Json::Value input;
-                        input["type"] = type.pretty_name();
-                        inputs.append(input);
-                    }
-                    Json::Value outputs;
-                    for (auto&& type: function->returnTypes())
-                    {
-                        Json::Value output;
-                        output["type"] = type.pretty_name();
-                        outputs.append(output);
-                    }
-                    json_function["inputs"] = inputs;
-                    json_function["outputs"] = outputs;
-                    json_functions.append(json_function);
-                }
-                response["type"] = "hi";
-                response["content"]["serializers"] = json_serializers;
-                response["content"]["functions"] = json_functions;
-                Json::FastWriter fastWriter;
-                std::string response_data = fastWriter.write(response);
-                std::cerr << response_data << std::endl;
-                server_instance.send(hdl, response_data, websocketpp::frame::opcode::text);
-                return;
-            }
-
-            if (type == "evaluate")
-            {
-                std::cerr << "Client requests program execution." << std::endl;
-                std::string program_text = root.get("program", "").asString();
-                if (program_text == "")
-                {
-                    std::cerr << "Invalid message" << std::endl;
-                    return;
-                }
-                std::cerr << program_text << std::endl;
-
-                Json::Value response;
-                try{
-
-                    auto nodes = fcl::readNodes(program_text, functions, serializers);
-
-                    Json::Value returns(Json::arrayValue);
-                    for (auto& returnNode : nodes.second)
-                    {
-                        auto endpoint = returnNode.sourceEndpoint;
-                        auto retType = endpoint.node()->function->returnTypes()[endpoint.index()];
-                        auto ret = fcl::evaluate(endpoint);
-                        auto it = std::find_if(serializers.begin(), serializers.end(),
-                            [&](std::shared_ptr<fcl::ISerializer> serializer)
-                            {
-                                return serializer->type().name() == retType.name();
-                            });
-
-                        if (it == serializers.end())
-                            throw std::runtime_error("Unable to deserialize return");
-
-                        auto serializer = *it;
-
-                        Json::Value json_ret;
-                        json_ret["node_name"] = endpoint.node()->name;
-                        json_ret["node_index"] = endpoint.index();
-                        json_ret["result"] = serializer->serialize(ret.get());
-                        returns.append(json_ret);
-                        // std::cerr << endpoint.node()->name << "." << endpoint.index() << ": '";
-                        // std::cerr << serializer->serialize(ret.get()) << "'" << std::endl;
-                    }
-                    response["content"] = returns;
-                    response["type"] = "result";
-                } catch(...)
-                {
-                    response["content"] = "Failed to evaluate";
-                    response["type"] = "error";
-                }
-                Json::FastWriter fastWriter;
-                std::string response_data = fastWriter.write(response);
-                std::cerr << response_data << std::endl;
-                server_instance.send(hdl, response_data, websocketpp::frame::opcode::text);
-                return;
-            }
+            std::string response_data = create_response(root, serializers, functions);
+            server_instance.send(hdl, response_data, websocketpp::frame::opcode::text);
         });
 
     server_instance.set_http_handler(
