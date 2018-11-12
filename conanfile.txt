@@ -2,6 +2,7 @@
  gtest/1.7.0@bincrafters/stable
  cli11/1.3.0@bincrafters/stable
  jsoncpp/1.8.4@theirix/stable
+ websocketpp/0.8.1@bincrafters/stable
 
  [generators]
  cmake
