@@ -29,4 +29,20 @@ Where on last line there is result of return.
 
 ![Alt Text](./demo.gif)
 
+## How to run
+~~~
+apt get install cmake g++
+pip install conan
+git clone https://github.com/JakubSzczerbinski/FCL.git
+cd FCL
+mkdir bin 
+cd bin && cmake ..
+make
+
+# Run cli
+./bin/fcl_cli --input-file <fcl_file>
+
+# Run graphical
+cd ../FCLws && ../bin/bin/fcl_ws -p 8080
+~~~
 
